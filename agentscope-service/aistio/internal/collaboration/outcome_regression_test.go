@@ -149,7 +149,7 @@ func TestChecklistUpdateUsesLeaderScopeAndPreservesRequirements(t *testing.T) {
 	if !criteria.Checklist[0].Required || !criteria.Checklist[0].Satisfied || criteria.Checklist[0].Text != "include sources" || criteria.Checklist[0].Evidence == "" {
 		t.Fatalf("criteria incorrectly changed: %s", updated.AcceptanceCriteria)
 	}
-	// A lead replacement report saved via task.respond belongs in the root summary.
+	// A lead replacement report saved via task_respond belongs in the root summary.
 	_, err = svc.Store.Collaboration().CreateComment(ctx, store.CreateCommentRequest{Comment: &controlmodel.Comment{IssueID: child.ID, Author: controlmodel.Actor{Type: controlmodel.ActorAgent, Ref: "lead"}, Type: controlmodel.CommentResult, Content: "full replacement EV report", SourceTaskID: &follow.ID}})
 	if err != nil {
 		t.Fatal(err)

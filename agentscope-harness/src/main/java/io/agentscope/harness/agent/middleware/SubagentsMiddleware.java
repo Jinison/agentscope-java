@@ -694,7 +694,7 @@ public class SubagentsMiddleware implements HarnessRuntimeMiddleware {
 
         List<BackgroundTask> visible = new ArrayList<>();
         for (BackgroundTask task : tasks) {
-            if (repo.isDelivered(ctx, sessionId, task.getTaskId())) continue;
+            if (repo.isDelivered(ctx, sessionId, task.task_getTaskId())) continue;
             visible.add(task);
         }
         if (visible.isEmpty()) {
@@ -710,12 +710,12 @@ public class SubagentsMiddleware implements HarnessRuntimeMiddleware {
                         .append(" more — use task_list() to see all)\n");
                 break;
             }
-            sb.append("- task_id: ").append(task.getTaskId());
-            if (task.getAgentId() != null) {
-                sb.append("  agent: ").append(task.getAgentId());
+            sb.append("- task_id: ").append(task.task_getTaskId());
+            if (task.task_getAgentId() != null) {
+                sb.append("  agent: ").append(task.task_getAgentId());
             }
-            sb.append("  status: ").append(task.getTaskStatus().name().toLowerCase());
-            sb.append("  started: ").append(ISO_SHORT.format(task.getCreatedAt()));
+            sb.append("  status: ").append(task.task_getTaskStatus().name().toLowerCase());
+            sb.append("  started: ").append(ISO_SHORT.format(task.task_getCreatedAt()));
             sb.append('\n');
             count++;
         }

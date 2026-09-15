@@ -102,7 +102,7 @@ func (s *Service) WaitForDelegatedWork(ctx context.Context, taskID uuid.UUID, su
 		return nil, nil, err
 	}
 	if len(pending) == 0 {
-		return nil, nil, fmt.Errorf("waiting requires outstanding delegated work or a queued outcome after deciding the current child; do not repeat this call unchanged. Read task.get and decide the current result. For missing human input, call issue.comment.add with mentions=[{type:human,ref:<accountableHumanRef>}] and then task.complete(outcome=succeeded) to end only this decision turn. For recoverable missing input use task.complete(outcome=blocked, result=<partial deliverable>) with the next action in summary; the coordinator stays resumable. Use run.node.fail only to explicitly abort the whole objective. A plain comment or a summary claiming the Issue is blocked does not change its status")
+		return nil, nil, fmt.Errorf("waiting requires outstanding delegated work or a queued outcome after deciding the current child; do not repeat this call unchanged. Read task_get and decide the current result. For missing human input, call issue_comment_add with mentions=[{type:human,ref:<accountableHumanRef>}] and then task_complete(outcome=succeeded) to end only this decision turn. For recoverable missing input use task_complete(outcome=blocked, result=<partial deliverable>) with the next action in summary; the coordinator stays resumable. Use run_node_fail only to explicitly abort the whole objective. A plain comment or a summary claiming the Issue is blocked does not change its status")
 	}
 	summary = strings.TrimSpace(summary)
 	if summary == "" {

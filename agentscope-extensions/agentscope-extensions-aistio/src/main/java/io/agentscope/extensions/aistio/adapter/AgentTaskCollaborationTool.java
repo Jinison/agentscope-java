@@ -38,14 +38,14 @@ final class AgentTaskCollaborationTool implements AgentTool {
 
     private static final Set<String> READ_ONLY =
             Set.of(
-                    "issue.get",
-                    "issue.comment.list",
-                    "artifact.download",
-                    "task.get",
-                    "team.get",
-                    "run.get",
-                    "run.graph",
-                    "run.artifacts");
+                    "issue_get",
+                    "issue_comment_list",
+                    "artifact_download",
+                    "task_get",
+                    "team_get",
+                    "run_get",
+                    "run_graph",
+                    "run_artifacts");
 
     private final CollaborationClient collaboration;
     private final String name;
@@ -107,7 +107,7 @@ final class AgentTaskCollaborationTool implements AgentTool {
                                             param.getToolUseBlock() == null
                                                     ? null
                                                     : param.getToolUseBlock().getId());
-                            if (Set.of("run.node.complete", "run.node.fail").contains(name)) {
+                            if (Set.of("run_node_complete", "run_node_fail").contains(name)) {
                                 AgentTaskOutcome.State state =
                                         runtimeContext.get(AgentTaskOutcome.State.class);
                                 if (state != null) state.markTerminalCommitted();

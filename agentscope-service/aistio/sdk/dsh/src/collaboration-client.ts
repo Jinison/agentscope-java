@@ -29,27 +29,27 @@ export interface MentionTarget { type: 'human' | 'agent' | 'team'; ref: string }
 export class CollaborationClient {
     constructor(private readonly http: ControlPlaneHttpClient) {}
 
-    issue(issueId: string, token: string) { return this.send('GET', `/api/v1/issues/${encodePath(issueId)}`, undefined, 'issue.get', { 'X-Agent-Task-Token': token }) }
-    comments(issueId: string, token: string, query = '') { return this.send('GET', `/api/v1/issues/${encodePath(issueId)}/comments${query}`, undefined, 'issue.comment.list', { 'X-Agent-Task-Token': token }) }
-    addComment(issueId: string, token: string, content: string, mentions: MentionTarget[] = [], parentId?: string) { return this.send('POST', `/api/v1/issues/${encodePath(issueId)}/comments`, { content, mentions, parentId }, 'issue.comment.add', { 'X-Agent-Task-Token': token }) }
-    createChild(taskId: string, token: string, body: unknown) { return this.taskSend('POST', taskId, 'children', token, body, 'issue.child.create') }
-    team(teamId: string, token: string) { return this.send('GET', `/api/v1/teams/${encodePath(teamId)}`, undefined, 'team.get', { 'X-Agent-Task-Token': token }) }
-    approval(token: string, body: unknown) { return this.send('POST', '/api/v1/approvals', body, 'approval.request', { 'X-Agent-Task-Token': token }) }
-    task(taskId: string, token: string) { return this.send('GET', `/api/v1/agent-tasks/${encodePath(taskId)}`, undefined, 'task.get', { 'X-Agent-Task-Token': token }) }
+    issue(issueId: string, token: string) { return this.send('GET', `/api/v1/issues/${encodePath(issueId)}`, undefined, 'issue_get', { 'X-Agent-Task-Token': token }) }
+    comments(issueId: string, token: string, query = '') { return this.send('GET', `/api/v1/issues/${encodePath(issueId)}/comments${query}`, undefined, 'issue_comment_list', { 'X-Agent-Task-Token': token }) }
+    addComment(issueId: string, token: string, content: string, mentions: MentionTarget[] = [], parentId?: string) { return this.send('POST', `/api/v1/issues/${encodePath(issueId)}/comments`, { content, mentions, parentId }, 'issue_comment_add', { 'X-Agent-Task-Token': token }) }
+    createChild(taskId: string, token: string, body: unknown) { return this.taskSend('POST', taskId, 'children', token, body, 'issue_child_create') }
+    team(teamId: string, token: string) { return this.send('GET', `/api/v1/teams/${encodePath(teamId)}`, undefined, 'team_get', { 'X-Agent-Task-Token': token }) }
+    approval(token: string, body: unknown) { return this.send('POST', '/api/v1/approvals', body, 'approval_request', { 'X-Agent-Task-Token': token }) }
+    task(taskId: string, token: string) { return this.send('GET', `/api/v1/agent-tasks/${encodePath(taskId)}`, undefined, 'task_get', { 'X-Agent-Task-Token': token }) }
     taskContext(taskId: string, token: string) { return this.taskSend('GET', taskId, 'context', token, undefined, 'task.context') }
     ack(taskId: string, token: string, inputIds: string[]) { return this.taskSend('POST', taskId, 'ack', token, { inputIds }, 'task.ack') }
-    start(taskId: string, token: string, expectedVersion = 0) { return this.taskSend('POST', taskId, 'start', token, { expectedVersion }, 'task.start') }
-    progress(taskId: string, token: string, content: string, mentions: MentionTarget[] = []) { return this.taskSend('POST', taskId, 'progress', token, { content, mentions }, 'task.progress') }
-    respond(taskId: string, token: string, content: string, mentions: MentionTarget[] = [], parentId?: string) { return this.taskSend('POST', taskId, 'respond', token, { content, mentions, parentId, type: 'result' }, 'task.respond') }
-    complete(taskId: string, token: string, body: unknown) { return this.taskSend('POST', taskId, 'complete', token, body, 'task.complete') }
-    fail(taskId: string, token: string, body: unknown) { return this.taskSend('POST', taskId, 'fail', token, body, 'task.fail') }
-	run(taskId: string, token: string) { return this.taskSend('GET', taskId, 'run', token, undefined, 'run.get') }
-	runGraph(taskId: string, token: string) { return this.taskSend('GET', taskId, 'run/graph', token, undefined, 'run.graph') }
-	completeRunNode(taskId: string, token: string, output: unknown) { return this.taskSend('POST', taskId, 'run/node/complete', token, { output }, 'run.node.complete') }
-	failRunNode(taskId: string, token: string, code: string, message: string) { return this.taskSend('POST', taskId, 'run/node/fail', token, { code, message }, 'run.node.fail') }
-	replanRun(taskId: string, token: string, node: unknown) { return this.taskSend('POST', taskId, 'run/replan', token, node, 'run.replan') }
-	signalRun(taskId: string, token: string, name: string, idempotencyKey: string, payload: unknown) { return this.taskSend('POST', taskId, `run/signals/${encodePath(name)}`, token, { idempotencyKey, payload }, 'run.signal') }
-	runArtifacts(taskId: string, token: string) { return this.taskSend('GET', taskId, 'run/artifacts', token, undefined, 'run.artifacts') }
+    start(taskId: string, token: string, expectedVersion = 0) { return this.taskSend('POST', taskId, 'start', token, { expectedVersion }, 'task_start') }
+    progress(taskId: string, token: string, content: string, mentions: MentionTarget[] = []) { return this.taskSend('POST', taskId, 'progress', token, { content, mentions }, 'task_progress') }
+    respond(taskId: string, token: string, content: string, mentions: MentionTarget[] = [], parentId?: string) { return this.taskSend('POST', taskId, 'respond', token, { content, mentions, parentId, type: 'result' }, 'task_respond') }
+    complete(taskId: string, token: string, body: unknown) { return this.taskSend('POST', taskId, 'complete', token, body, 'task_complete') }
+    fail(taskId: string, token: string, body: unknown) { return this.taskSend('POST', taskId, 'fail', token, body, 'task_fail') }
+	run(taskId: string, token: string) { return this.taskSend('GET', taskId, 'run', token, undefined, 'run_get') }
+	runGraph(taskId: string, token: string) { return this.taskSend('GET', taskId, 'run/graph', token, undefined, 'run_graph') }
+	completeRunNode(taskId: string, token: string, output: unknown) { return this.taskSend('POST', taskId, 'run/node/complete', token, { output }, 'run_node_complete') }
+	failRunNode(taskId: string, token: string, code: string, message: string) { return this.taskSend('POST', taskId, 'run/node/fail', token, { code, message }, 'run_node_fail') }
+	replanRun(taskId: string, token: string, node: unknown) { return this.taskSend('POST', taskId, 'run/replan', token, node, 'run_replan') }
+	signalRun(taskId: string, token: string, name: string, idempotencyKey: string, payload: unknown) { return this.taskSend('POST', taskId, `run/signals/${encodePath(name)}`, token, { idempotencyKey, payload }, 'run_signal') }
+	runArtifacts(taskId: string, token: string) { return this.taskSend('GET', taskId, 'run/artifacts', token, undefined, 'run_artifacts') }
 
     async uploadArtifact(taskId: string, token: string, filename: string, bytes: Uint8Array, contentType = 'application/octet-stream', targetType = 'agent-task', targetRef = taskId) {
         const form = new FormData()
@@ -58,13 +58,13 @@ export class CollaborationClient {
         form.set('targetType', targetType)
         form.set('targetRef', targetRef)
         const response = await this.http.sendBody('POST', '/api/v1/artifacts/uploads', form, { 'X-Agent-Task-Token': token })
-        if (response.status < 200 || response.status >= 300) throw new CollaborationHttpError('artifact.upload', response.status, response.body)
+        if (response.status < 200 || response.status >= 300) throw new CollaborationHttpError('artifact_upload', response.status, response.body)
         return response.json
     }
 
     async downloadArtifact(artifactId: string, taskId: string, token: string) {
         const response = await this.http.receiveBytes('POST', `/api/v1/artifacts/${encodePath(artifactId)}/download?taskId=${encodeURIComponent(taskId)}`, { 'X-Agent-Task-Token': token })
-        if (response.status < 200 || response.status >= 300) throw new CollaborationHttpError('artifact.download', response.status, new TextDecoder().decode(response.body))
+        if (response.status < 200 || response.status >= 300) throw new CollaborationHttpError('artifact_download', response.status, new TextDecoder().decode(response.body))
         return response.body
     }
 

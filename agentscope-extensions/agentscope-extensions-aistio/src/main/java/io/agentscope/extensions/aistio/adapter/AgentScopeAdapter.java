@@ -587,31 +587,33 @@ public final class AgentScopeAdapter implements FrameworkAdapter {
 
     private static Map<String, Object> toTaskJson(Task task) {
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("id", task.getId());
-        out.put("subject", task.getSubject());
-        if (task.getDescription() != null && !task.getDescription().isEmpty()) {
-            out.put("description", task.getDescription());
+        out.put("id", task.task_getId());
+        out.put("subject", task.task_getSubject());
+        if (task.task_getDescription() != null && !task.task_getDescription().isEmpty()) {
+            out.put("description", task.task_getDescription());
         }
         out.put(
                 "state",
-                task.getState() == null ? Task.State.PENDING.getWire() : task.getState().getWire());
-        if (task.getOwner() != null && !task.getOwner().isEmpty()) {
-            out.put("owner", task.getOwner());
+                task.task_getState() == null
+                        ? Task.State.PENDING.getWire()
+                        : task.task_getState().getWire());
+        if (task.task_getOwner() != null && !task.task_getOwner().isEmpty()) {
+            out.put("owner", task.task_getOwner());
         }
-        List<String> blockedBy = task.getBlockedBy();
+        List<String> blockedBy = task.task_getBlockedBy();
         if (blockedBy != null && !blockedBy.isEmpty()) {
             out.put("blockedBy", List.copyOf(blockedBy));
         } else {
             out.put("blockedBy", List.of());
         }
-        if (task.getCreatedAt() != null && !task.getCreatedAt().isEmpty()) {
-            out.put("updatedAt", task.getCreatedAt());
+        if (task.task_getCreatedAt() != null && !task.task_getCreatedAt().isEmpty()) {
+            out.put("updatedAt", task.task_getCreatedAt());
         }
         out.put(
                 "frameworkMeta",
-                task.getMetadata() == null || task.getMetadata().isEmpty()
+                task.task_getMetadata() == null || task.task_getMetadata().isEmpty()
                         ? Map.of()
-                        : task.getMetadata());
+                        : task.task_getMetadata());
         return out;
     }
 

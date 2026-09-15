@@ -575,7 +575,7 @@ func (r *collaborationRepo) CreateApproval(ctx context.Context, approval *contro
 		return nil, err
 	}
 	if err := enqueueCollaborationEventTx(ctx, tx, created.Tenant, "approval", created.ID,
-		"approval.requested.v1", created, "approval-requested:"+created.ID.String()); err != nil {
+		"approval_requested.v1", created, "approval-requested:"+created.ID.String()); err != nil {
 		return nil, err
 	}
 	if err := tx.Commit(ctx); err != nil {
@@ -692,7 +692,7 @@ func (r *collaborationRepo) CreateManagedToolApproval(ctx context.Context, req s
 		return nil, nil, nil, err
 	}
 	if err = enqueueCollaborationEventTx(ctx, tx, created.Tenant, "approval", created.ID,
-		"approval.requested.v1", created, "approval-requested:"+created.ID.String()); err != nil {
+		"approval_requested.v1", created, "approval-requested:"+created.ID.String()); err != nil {
 		return nil, nil, nil, err
 	}
 	if err = tx.Commit(ctx); err != nil {

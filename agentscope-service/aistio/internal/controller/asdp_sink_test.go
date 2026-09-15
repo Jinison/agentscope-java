@@ -122,9 +122,9 @@ func TestApplyExecutionAttemptReportRequiresSelectedTenantInstance(t *testing.T)
 		AgentID: agent.ID.String(), BindingID: catalogBinding.ID.String(), AgentKey: agent.AgentKey,
 		InstanceKey: "instance-a", InstanceGeneration: selected.Generation}
 	toolEvents := []ObservedEvent{
-		{SessionID: diagnosticSession.SessionID, Seq: 1, EventType: "tool_call", ToolName: "issue.child.create",
+		{SessionID: diagnosticSession.SessionID, Seq: 1, EventType: "tool_call", ToolName: "issue_child_create",
 			FrameworkMeta: json.RawMessage(`{"toolCallId":"call-1","state":"running"}`)},
-		{SessionID: diagnosticSession.SessionID, Seq: 2, EventType: "tool_result", ToolName: "issue.child.create",
+		{SessionID: diagnosticSession.SessionID, Seq: 2, EventType: "tool_result", ToolName: "issue_child_create",
 			ToolOutput:    "cannot scan NULL into *string",
 			FrameworkMeta: json.RawMessage(`{"toolCallId":"call-1","state":"error"}`)},
 	}

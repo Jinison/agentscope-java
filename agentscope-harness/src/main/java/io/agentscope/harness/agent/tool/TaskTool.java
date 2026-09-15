@@ -203,12 +203,12 @@ public class TaskTool {
         StringBuilder sb = new StringBuilder();
         sb.append(tasks.size()).append(" tracked task(s):\n");
         for (BackgroundTask task : tasks) {
-            sb.append("- task_id: ").append(task.getTaskId());
-            if (task.getAgentId() != null) {
-                sb.append("  agent: ").append(task.getAgentId());
+            sb.append("- task_id: ").append(task.task_getTaskId());
+            if (task.task_getAgentId() != null) {
+                sb.append("  agent: ").append(task.task_getAgentId());
             }
-            sb.append("  status: ").append(task.getTaskStatus().name().toLowerCase());
-            sb.append("  created: ").append(ISO_FORMATTER.format(task.getCreatedAt()));
+            sb.append("  status: ").append(task.task_getTaskStatus().name().toLowerCase());
+            sb.append("  created: ").append(ISO_FORMATTER.format(task.task_getCreatedAt()));
             sb.append('\n');
         }
         return sb.toString().trim();
@@ -227,17 +227,19 @@ public class TaskTool {
 
     private static String formatTaskDetail(BackgroundTask task) {
         StringBuilder sb = new StringBuilder();
-        sb.append("task_id: ").append(task.getTaskId()).append('\n');
-        if (task.getAgentId() != null) {
-            sb.append("agent_id: ").append(task.getAgentId()).append('\n');
+        sb.append("task_id: ").append(task.task_getTaskId()).append('\n');
+        if (task.task_getAgentId() != null) {
+            sb.append("agent_id: ").append(task.task_getAgentId()).append('\n');
         }
-        sb.append("status: ").append(task.getStatus()).append('\n');
-        sb.append("created_at: ").append(ISO_FORMATTER.format(task.getCreatedAt())).append('\n');
+        sb.append("status: ").append(task.task_getStatus()).append('\n');
+        sb.append("created_at: ")
+                .append(ISO_FORMATTER.format(task.task_getCreatedAt()))
+                .append('\n');
 
-        if (task.isCompleted() && task.getResult() != null) {
-            sb.append("\nResult:\n").append(task.getResult());
-        } else if (task.getError() != null) {
-            Exception err = task.getError();
+        if (task.isCompleted() && task.task_getResult() != null) {
+            sb.append("\nResult:\n").append(task.task_getResult());
+        } else if (task.task_getError() != null) {
+            Exception err = task.task_getError();
             sb.append("\nError:\n").append(err.getMessage());
             if (err.getCause() != null) {
                 sb.append("\nCause: ").append(err.getCause().getMessage());

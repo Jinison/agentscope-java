@@ -79,25 +79,25 @@ type externalRecorder struct {
 
 func TestManagedWakeInstructionsDescribeTeamRoleLifecycle(t *testing.T) {
 	standalone := managedWakeInstructions(&controlmodel.AgentTask{})
-	if !strings.Contains(standalone, "usable result") || !strings.Contains(standalone, "task.fail") ||
+	if !strings.Contains(standalone, "usable result") || !strings.Contains(standalone, "task_fail") ||
 		!strings.Contains(standalone, "human explicit mention") || !strings.Contains(standalone, "one authoritative visible reply") {
 		t.Fatalf("standalone instructions: %q", standalone)
 	}
 	teamID := uuid.New()
 	initial := managedWakeInstructions(&controlmodel.AgentTask{TeamID: &teamID, LeaderTask: true})
-	if !strings.Contains(initial, "initial Team leader") || !strings.Contains(initial, "task.complete immediately") {
+	if !strings.Contains(initial, "initial Team leader") || !strings.Contains(initial, "task_complete immediately") {
 		t.Fatalf("initial leader instructions: %q", initial)
 	}
 	parentID := uuid.New()
 	followUp := managedWakeInstructions(&controlmodel.AgentTask{
 		TeamID: &teamID, LeaderTask: true, ParentTaskID: &parentID,
 	})
-	if !strings.Contains(followUp, "leader follow-up") || !strings.Contains(followUp, "issue.accept") ||
+	if !strings.Contains(followUp, "leader follow-up") || !strings.Contains(followUp, "issue_accept") ||
 		strings.Contains(followUp, "Delegate suitable child work once") {
 		t.Fatalf("leader follow-up instructions: %q", followUp)
 	}
 	worker := managedWakeInstructions(&controlmodel.AgentTask{TeamID: &teamID})
-	if !strings.Contains(worker, "Team worker") || !strings.Contains(worker, "task.complete") {
+	if !strings.Contains(worker, "Team worker") || !strings.Contains(worker, "task_complete") {
 		t.Fatalf("worker instructions: %q", worker)
 	}
 }
@@ -478,7 +478,7 @@ func TestManagedWakeCarriesHumanRevisionForWorkersAndLeaders(t *testing.T) {
 func TestWorkflowWakeIncludesStepAndUpstreamDeliverable(t *testing.T) {
 	brief := &collaboration.ExecutionBrief{OriginalObjective: "Write then refine a poem", Workflow: &collaboration.WorkflowStepContext{NodeKey: "refine", NodeInput: json.RawMessage(`{"style":"concise"}`), Predecessors: []collaboration.WorkflowStepResult{{NodeKey: "draft", State: controlmodel.RunNodeSucceeded, Output: json.RawMessage(`{"poem":"upstream draft"}`)}}}}
 	wake := managedWakeWithBrief(&controlmodel.AgentTask{TriggerType: "orchestration_node"}, brief)
-	for _, want := range []string{`"nodeKey":"refine"`, `"poem":"upstream draft"`, `"style":"concise"`, "optional preferences", "task.complete before ending the turn", "workflow engine schedules subsequent steps"} {
+	for _, want := range []string{`"nodeKey":"refine"`, `"poem":"upstream draft"`, `"style":"concise"`, "optional preferences", "task_complete before ending the turn", "workflow engine schedules subsequent steps"} {
 		if !strings.Contains(wake, want) {
 			t.Fatalf("workflow wake missing %q: %s", want, wake)
 		}

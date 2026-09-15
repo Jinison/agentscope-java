@@ -32,7 +32,6 @@ class ModelConfigTest {
         ModelConfig cfg = ModelConfig.defaults();
         assertEquals(3, cfg.maxRetries());
         assertNull(cfg.fallbackModel());
-        assertNull(cfg.failoverListener());
     }
 
     @Test
@@ -42,17 +41,10 @@ class ModelConfigTest {
     }
 
     @Test
-    void twoArgConstructorDefaultsListenerToNull() {
+    void jsonSerializationOmitsFallbackModel() throws Exception {
         ModelConfig cfg = new ModelConfig(5, null);
-        assertNull(cfg.failoverListener());
-    }
-
-    @Test
-    void jsonSerializationOmitsFallbackModelAndListener() throws Exception {
-        ModelConfig cfg = new ModelConfig(5, null, (primary, error) -> {});
         String json = mapper.writeValueAsString(cfg);
         assertTrue(json.contains("\"maxRetries\":5"));
         assertTrue(!json.contains("fallbackModel"));
-        assertTrue(!json.contains("failoverListener"));
     }
 }

@@ -59,19 +59,19 @@ func TestCollaborationMCPToolCatalogFollowsTaskRole(t *testing.T) {
 			for _, tool := range collaborationMCPToolsForTask(tt.task) {
 				names[tool.Name] = true
 			}
-			if names["team.get"] != tt.wantTeam {
-				t.Fatalf("team.get visibility=%v, want %v", names["team.get"], tt.wantTeam)
+			if names["team_get"] != tt.wantTeam {
+				t.Fatalf("team_get visibility=%v, want %v", names["team_get"], tt.wantTeam)
 			}
-			for _, name := range []string{"issue.child.create", "issue.accept", "run.node.complete", "run.node.fail", "run.replan"} {
+			for _, name := range []string{"issue_child_create", "issue_accept", "run_node_complete", "run_node_fail", "run_replan"} {
 				if names[name] != tt.wantLeaderOps {
 					t.Fatalf("%s visibility=%v, want %v", name, names[name], tt.wantLeaderOps)
 				}
 			}
-			if !names["issue.get"] || !names["task.complete"] {
+			if !names["issue_get"] || !names["task_complete"] {
 				t.Fatalf("base tools missing: %+v", names)
 			}
-			if names["task.respond"] != tt.wantRespond {
-				t.Fatalf("task.respond visibility=%v, want %v", names["task.respond"], tt.wantRespond)
+			if names["task_respond"] != tt.wantRespond {
+				t.Fatalf("task_respond visibility=%v, want %v", names["task_respond"], tt.wantRespond)
 			}
 		})
 	}
@@ -83,9 +83,9 @@ func TestCollaborationMCPRejectsTeamWorkerRespondFromStaleClient(t *testing.T) {
 	context.Request = httptest.NewRequest(http.MethodPost, "/mcp/collaboration", nil)
 	_, err := (&Server{}).callCollaborationMCPTool(context, &controlmodel.AgentTask{
 		TeamID: &teamID,
-	}, "task.respond", map[string]any{"content": "interim acknowledgement"})
-	if err == nil || !strings.Contains(err.Error(), "task.complete") {
-		t.Fatalf("expected Team worker task.respond rejection, got %v", err)
+	}, "task_respond", map[string]any{"content": "interim acknowledgement"})
+	if err == nil || !strings.Contains(err.Error(), "task_complete") {
+		t.Fatalf("expected Team worker task_respond rejection, got %v", err)
 	}
 }
 
@@ -220,13 +220,13 @@ func TestChildCreateToolDescribesAcceptanceCriteriaObject(t *testing.T) {
 	var childTool *mcpTool
 	tools := collaborationMCPTools()
 	for i := range tools {
-		if tools[i].Name == "issue.child.create" {
+		if tools[i].Name == "issue_child_create" {
 			childTool = &tools[i]
 			break
 		}
 	}
 	if childTool == nil {
-		t.Fatal("issue.child.create tool is missing")
+		t.Fatal("issue_child_create tool is missing")
 	}
 	properties, ok := childTool.InputSchema["properties"].(map[string]any)
 	if !ok {
@@ -297,11 +297,11 @@ func TestCollaborationMCPIsTaskScopedAndUsesDomainServices(t *testing.T) {
 
 	listed := call("tools/list", map[string]any{})
 	encoded, _ := json.Marshal(listed.Result)
-	if !bytes.Contains(encoded, []byte(`"issue.comment.add"`)) || !bytes.Contains(encoded, []byte(`"artifact.upload"`)) ||
-		!bytes.Contains(encoded, []byte(`"task.start"`)) {
+	if !bytes.Contains(encoded, []byte(`"issue_comment_add"`)) || !bytes.Contains(encoded, []byte(`"artifact_upload"`)) ||
+		!bytes.Contains(encoded, []byte(`"task_start"`)) {
 		t.Fatalf("incomplete MCP tool catalog: %s", encoded)
 	}
-	if bytes.Contains(encoded, []byte(`"issue.child.create"`)) || bytes.Contains(encoded, []byte(`"run.node.complete"`)) {
+	if bytes.Contains(encoded, []byte(`"issue_child_create"`)) || bytes.Contains(encoded, []byte(`"run_node_complete"`)) {
 		t.Fatalf("standalone worker received Team leader tools: %s", encoded)
 	}
 	bearerBody := bytes.NewBufferString(`{"jsonrpc":"2.0","id":1,"method":"tools/list"}`)
@@ -310,24 +310,24 @@ func TestCollaborationMCPIsTaskScopedAndUsesDomainServices(t *testing.T) {
 	bearerReq.Header.Set("Content-Type", "application/json")
 	bearerResponse := httptest.NewRecorder()
 	srv.router.ServeHTTP(bearerResponse, bearerReq)
-	if bearerResponse.Code != http.StatusOK || !bytes.Contains(bearerResponse.Body.Bytes(), []byte(`"issue.get"`)) {
+	if bearerResponse.Code != http.StatusOK || !bytes.Contains(bearerResponse.Body.Bytes(), []byte(`"issue_get"`)) {
 		t.Fatalf("task-scoped bearer MCP access failed: status=%d body=%s", bearerResponse.Code, bearerResponse.Body.String())
 	}
-	read := call("tools/call", map[string]any{"name": "issue.get", "arguments": map[string]any{"issueId": issue.ID.String()}})
+	read := call("tools/call", map[string]any{"name": "issue_get", "arguments": map[string]any{"issueId": issue.ID.String()}})
 	if read.Error != nil {
-		t.Fatalf("issue.get RPC error: %+v", read.Error)
+		t.Fatalf("issue_get RPC error: %+v", read.Error)
 	}
-	currentTask := call("tools/call", map[string]any{"name": "task.get", "arguments": map[string]any{"taskId": "current"}})
+	currentTask := call("tools/call", map[string]any{"name": "task_get", "arguments": map[string]any{"taskId": "current"}})
 	currentTaskJSON, _ := json.Marshal(currentTask.Result)
 	if bytes.Contains(currentTaskJSON, []byte(`"isError":true`)) || !bytes.Contains(currentTaskJSON, []byte(tasks[0].ID.String())) {
-		t.Fatalf("task.get current did not resolve the token-scoped task: %s", currentTaskJSON)
+		t.Fatalf("task_get current did not resolve the token-scoped task: %s", currentTaskJSON)
 	}
-	blocked := call("tools/call", map[string]any{"name": "issue.get", "arguments": map[string]any{"issueId": other.ID.String()}})
+	blocked := call("tools/call", map[string]any{"name": "issue_get", "arguments": map[string]any{"issueId": other.ID.String()}})
 	blockedJSON, _ := json.Marshal(blocked.Result)
 	if !bytes.Contains(blockedJSON, []byte(`"isError":true`)) {
 		t.Fatalf("cross-Issue MCP call was not blocked: %s", blockedJSON)
 	}
-	created := call("tools/call", map[string]any{"name": "issue.comment.add", "arguments": map[string]any{"content": "durable MCP reply"}})
+	created := call("tools/call", map[string]any{"name": "issue_comment_add", "arguments": map[string]any{"content": "durable MCP reply"}})
 	createdJSON, _ := json.Marshal(created.Result)
 	if bytes.Contains(createdJSON, []byte(`"isError":true`)) {
 		t.Fatalf("comment add failed: %s", createdJSON)
@@ -337,7 +337,7 @@ func TestCollaborationMCPIsTaskScopedAndUsesDomainServices(t *testing.T) {
 		t.Fatalf("MCP comment attribution: %+v %v", comments, err)
 	}
 
-	uploaded := call("tools/call", map[string]any{"name": "artifact.upload", "arguments": map[string]any{
+	uploaded := call("tools/call", map[string]any{"name": "artifact_upload", "arguments": map[string]any{
 		"filename": "result.txt", "contentType": "text/plain", "contentBase64": base64.StdEncoding.EncodeToString([]byte("shared result")),
 	}})
 	uploadedJSON, _ := json.Marshal(uploaded.Result)
@@ -361,7 +361,7 @@ func TestCollaborationMCPIsTaskScopedAndUsesDomainServices(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	crossTask := callWithToken(otherToken, "tools/call", map[string]any{"name": "artifact.download", "arguments": map[string]any{
+	crossTask := callWithToken(otherToken, "tools/call", map[string]any{"name": "artifact_download", "arguments": map[string]any{
 		"artifactId": uploadEnvelope.StructuredContent.Artifact.ID.String(),
 	}})
 	crossTaskJSON, _ := json.Marshal(crossTask.Result)
@@ -392,7 +392,7 @@ func TestCollaborationMCPIsTaskScopedAndUsesDomainServices(t *testing.T) {
 	}
 	expiredAt := time.Now().UTC().Add(-time.Minute)
 	expiredID := createArtifact("", &expiredAt)
-	expired := call("tools/call", map[string]any{"name": "artifact.download", "arguments": map[string]any{
+	expired := call("tools/call", map[string]any{"name": "artifact_download", "arguments": map[string]any{
 		"artifactId": expiredID.String(), "_toolCallId": "call-expired-artifact",
 	}})
 	expiredJSON, _ := json.Marshal(expired.Result)
@@ -401,7 +401,7 @@ func TestCollaborationMCPIsTaskScopedAndUsesDomainServices(t *testing.T) {
 	}
 
 	corruptID := createArtifact("sha256:not-the-content-checksum", nil)
-	corrupt := call("tools/call", map[string]any{"name": "artifact.download", "arguments": map[string]any{"artifactId": corruptID.String()}})
+	corrupt := call("tools/call", map[string]any{"name": "artifact_download", "arguments": map[string]any{"artifactId": corruptID.String()}})
 	corruptJSON, _ := json.Marshal(corrupt.Result)
 	if !bytes.Contains(corruptJSON, []byte(`"isError":true`)) || !bytes.Contains(corruptJSON, []byte(`integrity`)) {
 		t.Fatalf("artifact checksum mismatch was not blocked: %s", corruptJSON)
@@ -543,7 +543,7 @@ func TestCollaborationMCPCompletedLeaderTokenOnlyFinalizesCoordinator(t *testing
 		}
 		return value
 	}
-	completed, _ := json.Marshal(call("run.node.complete").Result)
+	completed, _ := json.Marshal(call("run_node_complete").Result)
 	if bytes.Contains(completed, []byte(`"isError":true`)) {
 		t.Fatalf("active leader could not atomically conclude coordinator: %s", completed)
 	}
@@ -571,7 +571,7 @@ func TestCollaborationMCPCompletedLeaderTokenOnlyFinalizesCoordinator(t *testing
 	if !foundRootResult {
 		t.Fatalf("follow-up coordinator result was not projected to root Issue: comments=%+v", rootComments)
 	}
-	blocked, _ := json.Marshal(call("issue.get").Result)
+	blocked, _ := json.Marshal(call("issue_get").Result)
 	if !bytes.Contains(blocked, []byte(`"isError":true`)) || !bytes.Contains(blocked, []byte(`restricted`)) {
 		t.Fatalf("completed token accessed non-final tool: %s", blocked)
 	}
@@ -597,7 +597,7 @@ func TestCollaborationMCPRejectsNonTaskCredentials(t *testing.T) {
 }
 
 func TestLeaderFailurePublishesRootSummaryBeforeBlocked(t *testing.T) {
-	for _, tool := range []string{"run.node.fail", "task.fail", "task.complete"} {
+	for _, tool := range []string{"run_node_fail", "task_fail", "task_complete"} {
 		t.Run(tool, func(t *testing.T) {
 			ctx := context.Background()
 			st, err := store.Open(ctx, store.Config{Driver: store.DriverMemory})
@@ -645,7 +645,7 @@ func TestLeaderFailurePublishesRootSummaryBeforeBlocked(t *testing.T) {
 			response := httptest.NewRecorder()
 			srv.router.ServeHTTP(response, req)
 			if response.Code != http.StatusOK || bytes.Contains(response.Body.Bytes(), []byte(`"isError":true`)) {
-				t.Fatalf("run.node.fail: status=%d body=%s", response.Code, response.Body.String())
+				t.Fatalf("run_node_fail: status=%d body=%s", response.Code, response.Body.String())
 			}
 			failedTask, _ := st.Collaboration().GetAgentTask(ctx, running.ID)
 			failedAttempt, _ := st.ExecutionAttempts().Get(ctx, attempt.ID)
@@ -723,21 +723,21 @@ func TestMCPArtifactUploadEnforcesTeamSizeAndMediaPolicy(t *testing.T) {
 func TestCollaborationMCPCompleteProjectsHostedConversationTerminal(t *testing.T) {
 	st, server, session, running, token := startHostedMCPConversation(t, "test completion")
 
-	responded := callMCPTool(t, server, token, "task.respond", map[string]any{
+	responded := callMCPTool(t, server, token, "task_respond", map[string]any{
 		"content": "Qoder returned the final answer.",
 	})
 	respondedJSON, _ := json.Marshal(responded.Result)
 	if bytes.Contains(respondedJSON, []byte(`"isError":true`)) {
-		t.Fatalf("task.respond failed: %s", respondedJSON)
+		t.Fatalf("task_respond failed: %s", respondedJSON)
 	}
-	completed := callMCPTool(t, server, token, "task.complete", map[string]any{
+	completed := callMCPTool(t, server, token, "task_complete", map[string]any{
 		"taskId":  "current",
 		"summary": "short machine summary",
 		"result":  map[string]any{"status": "ok", "message": "machine result"},
 	})
 	completedJSON, _ := json.Marshal(completed.Result)
 	if bytes.Contains(completedJSON, []byte(`"isError":true`)) {
-		t.Fatalf("task.complete failed: %s", completedJSON)
+		t.Fatalf("task_complete failed: %s", completedJSON)
 	}
 
 	assertHostedTerminalEvents(t, st, session, "assistant.message", "Qoder returned the final answer.")
@@ -759,12 +759,12 @@ func TestCollaborationMCPCompleteProjectsHostedConversationTerminal(t *testing.T
 func TestCollaborationMCPFailProjectsHostedConversationTerminal(t *testing.T) {
 	st, server, session, running, token := startHostedMCPConversation(t, "test failure")
 
-	failed := callMCPTool(t, server, token, "task.fail", map[string]any{
+	failed := callMCPTool(t, server, token, "task_fail", map[string]any{
 		"code": "provider_error", "message": "Qoder failed cleanly",
 	})
 	failedJSON, _ := json.Marshal(failed.Result)
 	if bytes.Contains(failedJSON, []byte(`"isError":true`)) {
-		t.Fatalf("task.fail failed: %s", failedJSON)
+		t.Fatalf("task_fail failed: %s", failedJSON)
 	}
 
 	assertHostedTerminalEvents(t, st, session, "turn.failed", "Qoder failed cleanly")
@@ -917,7 +917,7 @@ func TestHostedCompletionOutcomeAndTurns(t *testing.T) {
 			if err != nil || len(turns) != 1 || turns[0].Status != store.TurnStatusRunning {
 				t.Fatalf("missing hosted running turn: %+v %v", turns, err)
 			}
-			reply := callMCPTool(t, srv, token, "task.complete", map[string]any{"outcome": outcome, "summary": "search tool unavailable", "code": "missing_tool", "message": "required source evidence unavailable", "result": map[string]any{"sources": []string{}}})
+			reply := callMCPTool(t, srv, token, "task_complete", map[string]any{"outcome": outcome, "summary": "search tool unavailable", "code": "missing_tool", "message": "required source evidence unavailable", "result": map[string]any{"sources": []string{}}})
 			raw, _ := json.Marshal(reply.Result)
 			if bytes.Contains(raw, []byte(`"isError":true`)) {
 				t.Fatalf("completion failed: %s", raw)
@@ -956,7 +956,7 @@ func TestStatelessMCPGetRejectsSSEWithoutHTML(t *testing.T) {
 func TestMCPFailureUsesTransportCallIdentity(t *testing.T) {
 	st, srv, _, attempt, token := startHostedMCPConversation(t, "tool diagnostic")
 	body, _ := json.Marshal(map[string]any{"jsonrpc": "2.0", "id": 1, "method": "tools/call",
-		"params": map[string]any{"name": "issue.get", "arguments": map[string]any{"issueId": uuid.NewString()},
+		"params": map[string]any{"name": "issue_get", "arguments": map[string]any{"issueId": uuid.NewString()},
 			"_meta": map[string]any{"io.agentscope/toolCallId": "call-schema-1"}}})
 	for range 2 {
 		req := httptest.NewRequest(http.MethodPost, "/mcp/collaboration", bytes.NewReader(body))
@@ -989,7 +989,7 @@ func TestMCPFailureUsesTransportCallIdentity(t *testing.T) {
 func TestHostedConsecutiveTurnsKeepHistoryAndIgnoreOldTerminalProjection(t *testing.T) {
 	ctx := context.Background()
 	st, srv, session, first, token := startHostedMCPConversation(t, "first turn")
-	callMCPTool(t, srv, token, "task.complete", map[string]any{"outcome": "succeeded", "result": "first answer"})
+	callMCPTool(t, srv, token, "task_complete", map[string]any{"outcome": "succeeded", "result": "first answer"})
 	first, err := st.ExecutionAttempts().Get(ctx, first.ID)
 	if err != nil || first.State != controlmodel.ExecutionSucceeded {
 		t.Fatalf("first turn: %+v %v", first, err)
@@ -1026,7 +1026,7 @@ func TestHostedConsecutiveTurnsKeepHistoryAndIgnoreOldTerminalProjection(t *test
 	if err != nil {
 		t.Fatal(err)
 	}
-	callMCPTool(t, srv, token, "task.complete", map[string]any{"outcome": "succeeded", "result": "second answer"})
+	callMCPTool(t, srv, token, "task_complete", map[string]any{"outcome": "succeeded", "result": "second answer"})
 	turns, err = st.Turns().List(ctx, session.ID, 10)
 	if err != nil || len(turns) != 2 || turns[0].Status != store.TurnStatusCompleted || turns[1].Status != store.TurnStatusCompleted {
 		t.Fatalf("two completed turns missing: %+v %v", turns, err)
@@ -1046,12 +1046,12 @@ func TestReviewFeedbackCanFinishButCannotDelegateOrChangeWork(t *testing.T) {
 	}
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = httptest.NewRequest(http.MethodPost, "/mcp/collaboration", nil)
-	for _, name := range []string{"issue.child.create", "issue.accept", "issue.cancel", "run.node.complete", "run.node.fail", "run.replan", "run.signal", "approval.request"} {
+	for _, name := range []string{"issue_child_create", "issue_accept", "issue_cancel", "run_node_complete", "run_node_fail", "run_replan", "run_signal", "approval_request"} {
 		if _, err := server.callCollaborationMCPTool(c, task, name, map[string]any{}); err == nil || !strings.Contains(err.Error(), "task.begin_work") {
 			t.Fatalf("%s bypassed feedback boundary: %v", name, err)
 		}
 	}
-	for _, name := range []string{"issue.comment.add", "task.respond", "task.progress"} {
+	for _, name := range []string{"issue_comment_add", "task_respond", "task_progress"} {
 		if _, err := server.callCollaborationMCPTool(c, task, name, map[string]any{"mentions": []any{map[string]any{"type": "agent", "ref": "worker"}}}); err == nil {
 			t.Fatalf("%s delegated through mentions", name)
 		}
@@ -1068,7 +1068,7 @@ func TestCompletionPreservesMessageDeliverableAlongsideSummary(t *testing.T) {
 				args["result"] = "explicit final poem"
 				want = "explicit final poem"
 			}
-			response := callMCPTool(t, srv, token, "task.complete", args)
+			response := callMCPTool(t, srv, token, "task_complete", args)
 			raw, _ := json.Marshal(response.Result)
 			if bytes.Contains(raw, []byte(`"isError":true`)) {
 				t.Fatalf("completion failed: %s", raw)

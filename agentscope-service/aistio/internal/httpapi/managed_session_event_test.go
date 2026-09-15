@@ -175,10 +175,10 @@ func TestManagedRunningEventStartsAssignedAttempt(t *testing.T) {
 	// result must still be durable, correlated and idempotent in Run diagnostics.
 	for _, callID := range []string{"local-schema", "remote-schema"} {
 		if callID == "remote-schema" {
-			srv.recordMCPToolFailure(ctx, started, "issue.get", callID, fmt.Errorf("scope mismatch"))
+			srv.recordMCPToolFailure(ctx, started, "issue_get", callID, fmt.Errorf("scope mismatch"))
 		}
 		report := managedSessionEventReport{ID: "evt-" + callID, SessionID: session.SessionID,
-			Seq: 2, Type: "agent.tool_result", Payload: map[string]any{"toolCallId": callID, "toolName": "issue.get", "state": "ERROR", "output": "scope mismatch"},
+			Seq: 2, Type: "agent.tool_result", Payload: map[string]any{"toolCallId": callID, "toolName": "issue_get", "state": "ERROR", "output": "scope mismatch"},
 			CreatedAt: time.Now().UnixMilli(), AgentTaskID: started.ID.String(), AttemptID: attempt.ID.String(), DispatchGen: attempt.DispatchGeneration, TurnID: attempt.TurnID}
 		data, _ := json.Marshal(report)
 		for retry := 0; retry < 2; retry++ {
@@ -641,7 +641,7 @@ func TestManagedExecutionContextUsesCurrentAttemptScopedToken(t *testing.T) {
 	}
 	foundStart := false
 	for _, action := range executionContext.TaskContext.AvailableActions {
-		foundStart = foundStart || action == "task.start"
+		foundStart = foundStart || action == "task_start"
 	}
 	if !foundStart || bytes.Contains(raw, []byte("attemptToken")) {
 		t.Fatalf("unexpected managed action contract: %s", raw)
@@ -825,7 +825,7 @@ func TestWorkflowIncompleteTurnGetsOnlyOneFencedCorrection(t *testing.T) {
 				t.Fatalf("missing previous response: %+v", brief.ExecutionBrief)
 			}
 			wake := brief.ExecutionBrief.Workflow.ProtocolCorrection
-			if !strings.Contains(wake, "task.complete") {
+			if !strings.Contains(wake, "task_complete") {
 				t.Fatal("missing correction instruction")
 			}
 		} else if task.Status != controlmodel.AgentTaskFailed {

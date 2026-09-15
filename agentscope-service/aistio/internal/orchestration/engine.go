@@ -796,7 +796,7 @@ func (e *Engine) sweepWaiting(ctx context.Context, run *controlmodel.Orchestrati
 				found := false
 				for _, event := range events {
 					after = event.Sequence
-					if event.Type == "run.signal."+cfg.SignalName {
+					if event.Type == "run_signal."+cfg.SignalName {
 						if _, err = e.Store.Orchestration().TransitionNode(ctx, node.ID, node.Version, controlmodel.RunNodeSucceeded, event.Payload, "", ""); err != nil {
 							return changed, err
 						}

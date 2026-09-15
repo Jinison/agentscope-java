@@ -361,7 +361,7 @@ public class WaitAsyncResultsTool {
                         + taskId
                         + " is no longer available. Use task_list to refresh task status.";
             }
-            if (!task.getTaskStatus().isTerminal()) {
+            if (!task.task_getTaskStatus().isTerminal()) {
                 return null;
             }
             terminalTasks.add(task);
@@ -384,23 +384,23 @@ public class WaitAsyncResultsTool {
                 .append('\n');
         for (BackgroundTask task : tasks) {
             task.updateLastCheckedAt();
-            if (task.isCompleted() && task.getTaskStatus().isTerminal()) {
+            if (task.isCompleted() && task.task_getTaskStatus().isTerminal()) {
                 try {
-                    taskRepository.markDelivered(runtimeContext, sessionId, task.getTaskId());
+                    taskRepository.markDelivered(runtimeContext, sessionId, task.task_getTaskId());
                 } catch (RuntimeException ignore) {
                     // Best-effort: failure only risks a redundant push reminder.
                 }
             }
             sb.append("---").append('\n');
-            sb.append("task_id: ").append(task.getTaskId()).append('\n');
-            if (task.getAgentId() != null) {
-                sb.append("agent_id: ").append(task.getAgentId()).append('\n');
+            sb.append("task_id: ").append(task.task_getTaskId()).append('\n');
+            if (task.task_getAgentId() != null) {
+                sb.append("agent_id: ").append(task.task_getAgentId()).append('\n');
             }
-            sb.append("status: ").append(task.getStatus()).append('\n');
-            if (task.getResult() != null) {
-                sb.append("Result:\n").append(task.getResult()).append('\n');
-            } else if (task.getError() != null) {
-                Exception err = task.getError();
+            sb.append("status: ").append(task.task_getStatus()).append('\n');
+            if (task.task_getResult() != null) {
+                sb.append("Result:\n").append(task.task_getResult()).append('\n');
+            } else if (task.task_getError() != null) {
+                Exception err = task.task_getError();
                 sb.append("Error:\n").append(err.getMessage()).append('\n');
                 if (err.getCause() != null) {
                     sb.append("Cause: ").append(err.getCause().getMessage()).append('\n');

@@ -868,12 +868,12 @@ func (r *collaborationRepo) CompleteAgentTask(ctx context.Context, id uuid.UUID,
 		return nil, err
 	}
 	if err := insertActivityTx(ctx, tx, &controlmodel.Activity{Tenant: task.Tenant, Namespace: task.Namespace,
-		IssueID: &task.IssueID, Actor: actor, Action: "agent_task.completed", ObjectType: "agent_task",
+		IssueID: &task.IssueID, Actor: actor, Action: "agent_task_completed", ObjectType: "agent_task",
 		ObjectRef: task.ID.String(), CausationID: task.CausationID, CorrelationID: task.CorrelationID}); err != nil {
 		return nil, err
 	}
 	if err := enqueueCollaborationEventTx(ctx, tx, task.Tenant, "agent-task", task.ID,
-		"agent-task.completed.v1", task, fmt.Sprintf("agent-task-completed:%s:%d", task.ID, task.Version)); err != nil {
+		"agent-task_completed.v1", task, fmt.Sprintf("agent-task-completed:%s:%d", task.ID, task.Version)); err != nil {
 		return nil, err
 	}
 	if err := tx.Commit(ctx); err != nil {

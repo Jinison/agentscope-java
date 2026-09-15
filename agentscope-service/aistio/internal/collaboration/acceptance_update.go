@@ -67,7 +67,7 @@ func (s *Service) UpdateAcceptanceFromTask(ctx context.Context, taskID uuid.UUID
 		found = true
 	}
 	if !found {
-		return nil, fmt.Errorf("unknown checklist item %q; read issue.get and use an existing item ID", itemID)
+		return nil, fmt.Errorf("unknown checklist item %q; read issue_get and use an existing item ID", itemID)
 	}
 	criteria["checklist"], _ = json.Marshal(checklist)
 	issue.AcceptanceCriteria, err = json.Marshal(criteria)

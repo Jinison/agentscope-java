@@ -349,7 +349,7 @@ func (s *Service) Signal(ctx context.Context, id uuid.UUID, name, key string, pa
 	if err != nil {
 		return err
 	}
-	event, err := s.Store.Orchestration().AppendRunEvent(ctx, &controlmodel.RunEvent{RunID: id, Tenant: run.Tenant, Namespace: run.Namespace, Type: "run.signal." + name, Actor: actor, Payload: payload, IdempotencyKey: "signal:" + name + ":" + key})
+	event, err := s.Store.Orchestration().AppendRunEvent(ctx, &controlmodel.RunEvent{RunID: id, Tenant: run.Tenant, Namespace: run.Namespace, Type: "run_signal." + name, Actor: actor, Payload: payload, IdempotencyKey: "signal:" + name + ":" + key})
 	if err != nil {
 		return err
 	}
@@ -580,7 +580,7 @@ func (s *Service) Replan(ctx context.Context, taskID uuid.UUID, definition Defin
 		return nil, err
 	}
 	_, _ = s.Store.Orchestration().AppendRunEvent(ctx, &controlmodel.RunEvent{RunID: task.OrchestrationRunID,
-		Tenant: task.Tenant, Namespace: task.Namespace, NodeID: &node.ID, Type: "run.replanned",
+		Tenant: task.Tenant, Namespace: task.Namespace, NodeID: &node.ID, Type: "run_replanned",
 		Actor: actor, Payload: config, IdempotencyKey: "replan:" + node.ID.String()})
 	if err = (&Engine{Store: s.Store, CEL: s.CEL}).ReconcileRun(ctx, task.OrchestrationRunID); err != nil {
 		return nil, err

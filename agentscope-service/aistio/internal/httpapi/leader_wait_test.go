@@ -89,7 +89,7 @@ func TestLeaderWaitPreservesWorkerAndResumesToRootSummary(t *testing.T) {
 							t.Fatal(err)
 						}
 						lead = waitTestStart(t, st, lead)
-						if _, err = waitTestCall(srv, lead, "task.complete", map[string]any{"outcome": "waiting"}); err == nil {
+						if _, err = waitTestCall(srv, lead, "task_complete", map[string]any{"outcome": "waiting"}); err == nil {
 							t.Fatal("leader waited without a durable wake source")
 						}
 						child, worker, err := svc.CreateChildFromTask(ctx, lead.ID, collaboration.CreateIssueRequest{Title: "worker report", AssigneeType: controlmodel.AssigneeAgent, AssigneeRef: workerID})
@@ -117,7 +117,7 @@ func TestLeaderWaitPreservesWorkerAndResumesToRootSummary(t *testing.T) {
 							t.Fatalf("mention: %+v %v", routed, err)
 						}
 						nextWorker := waitTestStart(t, st, &routed.Tasks[0])
-						if _, err = waitTestCall(srv, nextWorker, "task.complete", map[string]any{"outcome": "waiting"}); err == nil {
+						if _, err = waitTestCall(srv, nextWorker, "task_complete", map[string]any{"outcome": "waiting"}); err == nil {
 							t.Fatal("worker accepted leader-only waiting outcome")
 						}
 						finishWorker := func() {
@@ -131,12 +131,12 @@ func TestLeaderWaitPreservesWorkerAndResumesToRootSummary(t *testing.T) {
 							finishWorker()
 						}
 						// Generic failure is ambiguous while an owned wake is pending. It must be
-						// rejected without mutating any execution; explicit run.node.fail remains available.
-						if _, err = waitTestCall(srv, follow, "task.fail", map[string]any{"code": "objective_blocked", "message": "waiting for worker"}); err == nil || !strings.Contains(err.Error(), "outcome=waiting") {
+						// rejected without mutating any execution; explicit run_node_fail remains available.
+						if _, err = waitTestCall(srv, follow, "task_fail", map[string]any{"code": "objective_blocked", "message": "waiting for worker"}); err == nil || !strings.Contains(err.Error(), "outcome=waiting") {
 							t.Fatalf("unsafe generic failure accepted: %v", err)
 						}
 						if outcome == "explicit_abort" {
-							if _, err = waitTestCall(srv, follow, "run.node.fail", map[string]any{"code": "unrecoverable", "message": "explicitly abort all remaining work"}); err != nil {
+							if _, err = waitTestCall(srv, follow, "run_node_fail", map[string]any{"code": "unrecoverable", "message": "explicitly abort all remaining work"}); err != nil {
 								t.Fatal(err)
 							}
 							run, _ := st.Orchestration().GetRun(ctx, lead.OrchestrationRunID)
@@ -146,7 +146,7 @@ func TestLeaderWaitPreservesWorkerAndResumesToRootSummary(t *testing.T) {
 							}
 							return
 						}
-						value, err := waitTestCall(srv, follow, "task.complete", map[string]any{"outcome": outcome, "message": "waiting for worker reply"})
+						value, err := waitTestCall(srv, follow, "task_complete", map[string]any{"outcome": outcome, "message": "waiting for worker reply"})
 						if err != nil {
 							t.Fatal(err)
 						}
@@ -186,7 +186,7 @@ func TestLeaderWaitPreservesWorkerAndResumesToRootSummary(t *testing.T) {
 						if _, err = svc.AcceptIssueFromTask(ctx, final.ID, "FOLLOWUP_OK_144 verified"); err != nil {
 							t.Fatal(err)
 						}
-						if _, err = waitTestCall(srv, final, "run.node.complete", map[string]any{"output": "FOLLOWUP_OK_144 accepted; all work complete"}); err != nil {
+						if _, err = waitTestCall(srv, final, "run_node_complete", map[string]any{"output": "FOLLOWUP_OK_144 accepted; all work complete"}); err != nil {
 							t.Fatal(err)
 						}
 						run, _ = st.Orchestration().GetRun(ctx, lead.OrchestrationRunID)

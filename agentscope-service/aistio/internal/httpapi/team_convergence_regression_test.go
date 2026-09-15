@@ -92,7 +92,7 @@ func TestTeamMCPConvergesAfterReviewingEachWorkerOutcome(t *testing.T) {
 					break
 				}
 			}
-			if err := call(lead, "task.complete", map[string]any{"outcome": "succeeded", "summary": "delegated"}); err != nil {
+			if err := call(lead, "task_complete", map[string]any{"outcome": "succeeded", "summary": "delegated"}); err != nil {
 				t.Fatal(err)
 			}
 			for _, worker := range workers {
@@ -101,7 +101,7 @@ func TestTeamMCPConvergesAfterReviewingEachWorkerOutcome(t *testing.T) {
 				if blocked {
 					outcome = "blocked"
 				}
-				if err := call(worker, "task.complete", map[string]any{"outcome": outcome, "summary": "worker delivery", "result": map[string]any{"answer": 42}, "code": "missing_tool", "message": "search unavailable"}); err != nil {
+				if err := call(worker, "task_complete", map[string]any{"outcome": outcome, "summary": "worker delivery", "result": map[string]any{"answer": 42}, "code": "missing_tool", "message": "search unavailable"}); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -117,7 +117,7 @@ func TestTeamMCPConvergesAfterReviewingEachWorkerOutcome(t *testing.T) {
 					t.Fatalf("follow-ups: %+v %v; worker=%+v node=%+v", follows, err, current, node)
 				}
 				follow := start(follows[0])
-				if err := call(follow, "task.complete", map[string]any{"outcome": "succeeded"}); err == nil {
+				if err := call(follow, "task_complete", map[string]any{"outcome": "succeeded"}); err == nil {
 					t.Fatal("unreviewed child was allowed to wait for a sibling")
 				}
 				if blocked {
@@ -128,26 +128,26 @@ func TestTeamMCPConvergesAfterReviewingEachWorkerOutcome(t *testing.T) {
 					if outcome := envelope.CoordinatorChildren[0].Outcomes[0]; outcome.Status != controlmodel.AgentTaskFailed || outcome.ErrorCode != "missing_tool" {
 						t.Fatalf("failure became a usable result: %+v", outcome)
 					}
-					if err := call(follow, "issue.accept", nil); err == nil {
+					if err := call(follow, "issue_accept", nil); err == nil {
 						t.Fatal("failed worker without a usable result was accepted")
 					}
-					if err := call(follow, "run.node.fail", map[string]any{"code": "missing_tool", "message": "required evidence unavailable"}); err != nil {
+					if err := call(follow, "run_node_fail", map[string]any{"code": "missing_tool", "message": "required evidence unavailable"}); err != nil {
 						t.Fatal(err)
 					}
 					break
 				}
-				if err := call(follow, "issue.accept", map[string]any{"reason": "verified structured result"}); err != nil {
+				if err := call(follow, "issue_accept", map[string]any{"reason": "verified structured result"}); err != nil {
 					t.Fatal(err)
 				}
 				if i < len(workers)-1 {
-					if err := call(follow, "task.complete", map[string]any{"outcome": "succeeded", "summary": "accepted current child"}); err != nil {
+					if err := call(follow, "task_complete", map[string]any{"outcome": "succeeded", "summary": "accepted current child"}); err != nil {
 						t.Fatal(err)
 					}
 				} else {
-					if err := call(follow, "task.complete", map[string]any{"outcome": "succeeded"}); err == nil {
+					if err := call(follow, "task_complete", map[string]any{"outcome": "succeeded"}); err == nil {
 						t.Fatal("last coordinator left without a terminal node decision")
 					}
-					if err := call(follow, "run.node.complete", map[string]any{"output": json.RawMessage(`{"combined":84}`)}); err != nil {
+					if err := call(follow, "run_node_complete", map[string]any{"output": json.RawMessage(`{"combined":84}`)}); err != nil {
 						t.Fatal(err)
 					}
 				}

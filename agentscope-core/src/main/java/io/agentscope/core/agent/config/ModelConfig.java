@@ -21,17 +21,13 @@ import io.agentscope.core.model.Model;
 /**
  * Model invocation configuration. {@link #maxRetries()} bounds the retry count on a single
  * model call; {@link #fallbackModel()} (nullable) is invoked if the primary model still fails
- * after exhausting retries — the fallback shares the same {@code maxRetries} budget. {@link
- * #failoverListener()} (nullable) is notified when such a switch happens.
+ * after exhausting retries — the fallback shares the same {@code maxRetries} budget.
  *
- * <p>The {@code fallbackModel} and {@code failoverListener} fields are intentionally excluded
- * from JSON serialisation ({@code @JsonIgnore}): they hold live instances (credentials,
- * connections, callbacks) that don't round-trip cleanly through a state snapshot.
+ * <p>The {@code fallbackModel} field is intentionally excluded from JSON serialisation
+ * ({@code @JsonIgnore}): model instances hold credentials/connections that don't round-trip
+ * cleanly through a state snapshot.
  */
-public record ModelConfig(
-        int maxRetries,
-        @JsonIgnore Model fallbackModel,
-        @JsonIgnore FailoverListener failoverListener) {
+public record ModelConfig(int maxRetries, @JsonIgnore Model fallbackModel) {
 
     public static final int DEFAULT_MAX_RETRIES = 3;
 
@@ -41,16 +37,8 @@ public record ModelConfig(
         }
     }
 
-    /**
-     * Convenience constructor without failover observation; equivalent to passing a {@code null}
-     * listener.
-     */
-    public ModelConfig(int maxRetries, Model fallbackModel) {
-        this(maxRetries, fallbackModel, null);
-    }
-
     /** Returns a config initialised to all default values (no fallback model). */
     public static ModelConfig defaults() {
-        return new ModelConfig(DEFAULT_MAX_RETRIES, null, null);
+        return new ModelConfig(DEFAULT_MAX_RETRIES, null);
     }
 }

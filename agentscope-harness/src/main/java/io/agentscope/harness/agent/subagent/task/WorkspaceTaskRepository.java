@@ -694,11 +694,12 @@ public class WorkspaceTaskRepository implements TaskRepository {
                             rc = RuntimeContext.empty();
                         }
                         try {
-                            updateStatus(rc, sid, task.getTaskId(), TaskStatus.RUNNING, null, null);
+                            updateStatus(
+                                    rc, sid, task.task_getTaskId(), TaskStatus.RUNNING, null, null);
                         } catch (Exception e) {
                             log.debug(
                                     "Heartbeat update failed for task {}: {}",
-                                    task.getTaskId(),
+                                    task.task_getTaskId(),
                                     e.getMessage());
                         }
                     }

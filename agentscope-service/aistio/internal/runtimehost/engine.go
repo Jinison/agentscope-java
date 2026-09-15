@@ -461,7 +461,7 @@ func appendRuntimeContext(prompt string, task *controlmodel.AgentTask, descripto
 		}
 		prompt += "."
 		if task.LeaderTask {
-			prompt += " Delegate or inspect Team work through MCP or the task-scoped CLI. A blocked worker Issue is a valid outcome that requires your decision: use run.replan to retry or reassign it, issue.cancel only when a degraded/partial result is acceptable, request human action when external configuration is required, or use run.node.fail when the overall objective is unrecoverable. On a successful follow-up, call issue.accept after validating the worker result. Once all delegated Issues are accepted or explicitly skipped and work has converged, call run.node.complete and stop; that call also completes this leader Task."
+			prompt += " Delegate or inspect Team work through MCP or the task-scoped CLI. A blocked worker Issue is a valid outcome that requires your decision: use run_replan to retry or reassign it, issue_cancel only when a degraded/partial result is acceptable, request human action when external configuration is required, or use run_node_fail when the overall objective is unrecoverable. On a successful follow-up, call issue_accept after validating the worker result. Once all delegated Issues are accepted or explicitly skipped and work has converged, call run_node_complete and stop; that call also completes this leader Task."
 		}
 	}
 	return prompt, nil

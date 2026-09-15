@@ -108,10 +108,10 @@ func (m *WorkspaceManager) PrepareForExecution(ctx context.Context, envelope *co
 	}
 	if envelope.ReplyToOwnDelegation {
 		prompt += "\n\nThis is the result of work you previously delegated. Evaluate the answer and finish according to these initiating instructions:\n" + envelope.InitiatingRequest +
-			"\nDo not mention the responder merely to acknowledge their answer: that schedules another task. Use task.complete for the final delivery."
+			"\nDo not mention the responder merely to acknowledge their answer: that schedules another task. Use task_complete for the final delivery."
 	}
 	if task.LeaderTask {
-		prompt += "\n\nAfter asking a worker for follow-up work with an explicit mention, call task.complete(outcome=waiting) to yield. This ends only your turn and preserves the worker. Waiting for a worker is not failure. Use run.node.fail only to explicitly abort the entire coordinator and its remaining work. Before ending the coordinator, summarize completed work, unfinished work, the reason for the final status, and the next action. Include this summary in run.node.complete output or run.node.fail message; it will be published on the main Issue before its status changes."
+		prompt += "\n\nAfter asking a worker for follow-up work with an explicit mention, call task_complete(outcome=waiting) to yield. This ends only your turn and preserves the worker. Waiting for a worker is not failure. Use run_node_fail only to explicitly abort the entire coordinator and its remaining work. Before ending the coordinator, summarize completed work, unfinished work, the reason for the final status, and the next action. Include this summary in run_node_complete output or run_node_fail message; it will be published on the main Issue before its status changes."
 	}
 	if task.LeaderTask && len(envelope.CoordinatorChildren) > 0 {
 		prompt += "\n\nCoordinator child outcomes (synthesize all of these before completing the coordinator):"

@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.agentscope.core.ReActAgent;
-import io.agentscope.core.agent.config.FailoverListener;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.MsgRole;
 import io.agentscope.core.middleware.MiddlewareBase;
@@ -143,7 +142,6 @@ class ReActAgentNewLoopBuilderTest {
     void fromAgentCopiesModelResilienceConfig() {
         ChatModelBase model = newFakeModel();
         ChatModelBase fallback = newFakeModel();
-        FailoverListener listener = (primary, error) -> {};
 
         ReActAgent source =
                 ReActAgent.builder()
@@ -152,7 +150,6 @@ class ReActAgentNewLoopBuilderTest {
                         .model(model)
                         .fallbackModel(fallback)
                         .maxRetries(7)
-                        .failoverListener(listener)
                         .toolkit(new Toolkit())
                         .build();
 
@@ -161,7 +158,6 @@ class ReActAgentNewLoopBuilderTest {
         assertNotNull(copy.getModelConfig());
         assertEquals(7, copy.getModelConfig().maxRetries());
         assertSame(fallback, copy.getModelConfig().fallbackModel());
-        assertSame(listener, copy.getModelConfig().failoverListener());
         assertSame(model, copy.getModel());
     }
 

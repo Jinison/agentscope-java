@@ -213,13 +213,13 @@ func (r *collaborationRepo) CompleteAgentTaskWithComment(ctx context.Context, id
 	if err := reconcileCompletedTaskTx(ctx, tx, task, attempt, completion.Result, created.Author); err != nil {
 		return nil, nil, err
 	}
-	if err := insertActivityTx(ctx, tx, &controlmodel.Activity{Tenant: issue.Tenant, Namespace: issue.Namespace, IssueID: &issue.ID, Actor: created.Author, Action: "agent_task.completed", ObjectType: "agent_task", ObjectRef: task.ID.String(), CausationID: task.CausationID, CorrelationID: task.CorrelationID}); err != nil {
+	if err := insertActivityTx(ctx, tx, &controlmodel.Activity{Tenant: issue.Tenant, Namespace: issue.Namespace, IssueID: &issue.ID, Actor: created.Author, Action: "agent_task_completed", ObjectType: "agent_task", ObjectRef: task.ID.String(), CausationID: task.CausationID, CorrelationID: task.CorrelationID}); err != nil {
 		return nil, nil, err
 	}
 	if err := enqueueCollaborationEventTx(ctx, tx, task.Tenant, "comment", created.ID, "comment.created.v1", map[string]any{"comment": created, "routes": routes}, "comment-created:"+created.ID.String()); err != nil {
 		return nil, nil, err
 	}
-	if err := enqueueCollaborationEventTx(ctx, tx, task.Tenant, "agent-task", task.ID, "agent-task.completed.v1", task, fmt.Sprintf("agent-task-completed:%s:%d", task.ID, task.Version)); err != nil {
+	if err := enqueueCollaborationEventTx(ctx, tx, task.Tenant, "agent-task", task.ID, "agent-task_completed.v1", task, fmt.Sprintf("agent-task-completed:%s:%d", task.ID, task.Version)); err != nil {
 		return nil, nil, err
 	}
 	if err := tx.Commit(ctx); err != nil {

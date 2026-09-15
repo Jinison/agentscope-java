@@ -175,6 +175,43 @@ public final class Task {
         return blockedBy;
     }
 
+    /** Task-scoped accessor aliases used by the aistio task adapter and harness tools. */
+    public String task_getId() {
+        return getId();
+    }
+
+    public String task_getSubject() {
+        return getSubject();
+    }
+
+    public String task_getDescription() {
+        return getDescription();
+    }
+
+    public Map<String, Object> task_getMetadata() {
+        return getMetadata();
+    }
+
+    public String task_getCreatedAt() {
+        return getCreatedAt();
+    }
+
+    public State task_getState() {
+        return getState();
+    }
+
+    public String task_getOwner() {
+        return getOwner();
+    }
+
+    public List<String> task_getBlocks() {
+        return getBlocks();
+    }
+
+    public List<String> task_getBlockedBy() {
+        return getBlockedBy();
+    }
+
     public static Builder builder() {
         return new Builder();
     }

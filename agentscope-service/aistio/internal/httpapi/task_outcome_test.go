@@ -64,7 +64,7 @@ func TestRESTTaskOutcomeDoesNotTreatBlockedAsObjectiveSuccess(t *testing.T) {
 			if transport == "mcp" {
 				path = "/mcp/collaboration"
 				delete(args, "expectedVersion")
-				body, _ = json.Marshal(map[string]any{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": map[string]any{"name": "task.complete", "arguments": args}})
+				body, _ = json.Marshal(map[string]any{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": map[string]any{"name": "task_complete", "arguments": args}})
 			} else {
 				body, _ = json.Marshal(args)
 			}

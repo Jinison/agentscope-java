@@ -44,7 +44,7 @@ type HumanRevision struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-const executionDecisionRule = "Apply the human revisions in chronological order to the original objective; the newest instruction wins where they conflict. Acknowledgements or praise alone do not authorize new work; preserve review-feedback handling. The trigger input may be a worker failure notification, not a requirement to repeat that failure. Decide the deliverable and required evidence BEFORE choosing tools. If the human permits an answer from existing knowledge, answer directly without web search or credentials and state the freshness/verification limits. If fresh sources or external verification remain required, do not substitute an unverified answer. A tool error blocks the task only when that tool is still necessary for the revised objective and no authorized alternative can produce the deliverable. Before task.fail or asking the human for a key, re-evaluate that necessity; leaders must make the same check before repeating a worker's blocker."
+const executionDecisionRule = "Apply the human revisions in chronological order to the original objective; the newest instruction wins where they conflict. Acknowledgements or praise alone do not authorize new work; preserve review-feedback handling. The trigger input may be a worker failure notification, not a requirement to repeat that failure. Decide the deliverable and required evidence BEFORE choosing tools. If the human permits an answer from existing knowledge, answer directly without web search or credentials and state the freshness/verification limits. If fresh sources or external verification remain required, do not substitute an unverified answer. A tool error blocks the task only when that tool is still necessary for the revised objective and no authorized alternative can produce the deliverable. Before task_fail or asking the human for a key, re-evaluate that necessity; leaders must make the same check before repeating a worker's blocker."
 
 func (s *Service) buildExecutionBrief(ctx context.Context, envelope *ContextEnvelope) (*ExecutionBrief, error) {
 	comments, err := s.Store.Collaboration().ListComments(ctx, envelope.Issue.ID, store.CommentListOptions{Limit: 50, Tail: 50})
@@ -103,7 +103,7 @@ func (s *Service) workflowStepContext(ctx context.Context, envelope *ContextEnve
 		return nil, err
 	}
 	if len(attempts) > 0 && attempts[0].FailureCode == "managed_turn_incomplete" {
-		step.ProtocolCorrection = "Your previous turn did not submit the deliverable through a completion tool. Reuse its draft if useful; do not redo successful actions or ask for optional preferences. Call task.complete with outcome=succeeded and the FULL deliverable in result now, or task.fail if the objective truly cannot be achieved. Another plain response will fail this node. Previous turn: " + attempts[0].FailureMessage
+		step.ProtocolCorrection = "Your previous turn did not submit the deliverable through a completion tool. Reuse its draft if useful; do not redo successful actions or ask for optional preferences. Call task_complete with outcome=succeeded and the FULL deliverable in result now, or task_fail if the objective truly cannot be achieved. Another plain response will fail this node. Previous turn: " + attempts[0].FailureMessage
 	}
 	edges, err := s.Store.Orchestration().ListEdges(ctx, envelope.Run.ID)
 	if err != nil {

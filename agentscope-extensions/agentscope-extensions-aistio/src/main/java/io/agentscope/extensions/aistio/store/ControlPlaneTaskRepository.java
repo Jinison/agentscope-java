@@ -428,7 +428,7 @@ public final class ControlPlaneTaskRepository implements TaskRepository {
                         }
                         Map<String, String> ref = new LinkedHashMap<>();
                         ref.put("parentSessionId", sid);
-                        ref.put("taskId", task.getTaskId());
+                        ref.put("taskId", task.task_getTaskId());
                         refs.add(ref);
                     }
                 });

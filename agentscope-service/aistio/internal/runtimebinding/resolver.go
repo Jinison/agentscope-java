@@ -317,12 +317,12 @@ func (r *Resolver) dispatchManaged(ctx context.Context, taskID uuid.UUID, candid
 func managedWakeWithBrief(task *controlmodel.AgentTask, brief *collaboration.ExecutionBrief) string {
 	instructions := managedWakeInstructions(task)
 	if brief != nil && brief.Workflow != nil {
-		instructions += " You are executing one step of a declared workflow. Read executionBrief.workflow: nodeKey identifies this step, nodeInput is its resolved assignment, runInput is the overall request, and predecessors contains direct upstream results with their states. Use explicit nodeInput first; use upstream outputs as context to continue or refine the requested work, not as instructions to repeat finished steps. Do not treat failed or skipped upstream work as a successful deliverable. The workflow engine schedules subsequent steps; finish only this step. For open-ended writing or similar low-risk work, choose reasonable defaults for optional preferences (such as theme or style) and produce the deliverable now. Do not stop merely to ask for optional preferences. If essential information truly prevents useful work, call task.fail with the specific missing input. A plain final message neither completes a workflow node nor establishes a human wait. Submit the actual step deliverable through task.complete before ending the turn; put the complete text in result and only a short description in summary; never claim completion based only on a promise or clarification question."
+		instructions += " You are executing one step of a declared workflow. Read executionBrief.workflow: nodeKey identifies this step, nodeInput is its resolved assignment, runInput is the overall request, and predecessors contains direct upstream results with their states. Use explicit nodeInput first; use upstream outputs as context to continue or refine the requested work, not as instructions to repeat finished steps. Do not treat failed or skipped upstream work as a successful deliverable. The workflow engine schedules subsequent steps; finish only this step. For open-ended writing or similar low-risk work, choose reasonable defaults for optional preferences (such as theme or style) and produce the deliverable now. Do not stop merely to ask for optional preferences. If essential information truly prevents useful work, call task_fail with the specific missing input. A plain final message neither completes a workflow node nor establishes a human wait. Submit the actual step deliverable through task_complete before ending the turn; put the complete text in result and only a short description in summary; never claim completion based only on a promise or clarification question."
 	}
 	if brief == nil {
 		return instructions
 	}
-	// Keep task/runtime identities out of the physical wake; task.get exposes references.
+	// Keep task/runtime identities out of the physical wake; task_get exposes references.
 	type wakeRevision struct {
 		Content string `json:"content"`
 	}
@@ -340,68 +340,68 @@ func managedWakeWithBrief(task *controlmodel.AgentTask, brief *collaboration.Exe
 		instructions += "\nPROTOCOL CORRECTION: " + brief.Workflow.ProtocolCorrection
 	}
 	return instructions + "\n\nCURRENT EXECUTION BRIEF\n" + brief.DecisionRule + "\n" + string(payload) +
-		"\nFirst read task.get.executionBrief to confirm the current context. Apply these human revisions before selecting any tool or declaring a blocker."
+		"\nFirst read task_get.executionBrief to confirm the current context. Apply these human revisions before selecting any tool or declaring a blocker."
 }
 
 func managedWakeInstructions(task *controlmodel.AgentTask) string {
 	base := "A durable AgentTask is ready. Use the aistio-collaboration tools to read authoritative " +
 		"context, perform work, report progress, and finish. Do not merely describe intended actions; " +
-		"only report an action after tool success. Read task.get executionBrief and currentRequest first. For comment-triggered work, " +
+		"only report an action after tool success. Read task_get executionBrief and currentRequest first. For comment-triggered work, " +
 		"the routed comments are the CURRENT assignment and override older Issue requirements. Use requestContext " +
 		"only to interpret the reply and its original hand-off; do not execute that history again. " +
 		"When replyToOwnDelegation is true, evaluate the returned result according to initiatingRequest and complete the current task. " +
 		"Do not mention the responding Agent just to acknowledge their answer; that creates another task. " +
 		"An explicit mention is only for new actionable work required by the current requester. " +
-		"Use math.evaluate to verify arithmetic before submitting or accepting numeric results. " +
+		"Use math_evaluate to verify arithmetic before submitting or accepting numeric results. " +
 		"Verify other objective claims as well; a worker success flag alone is not acceptance evidence."
 	if task != nil && task.TriggerType == controlmodel.AgentTaskReviewComment {
-		return base + " You are handling feedback on delivered work, NOT an initial Team assignment. Read currentRequest, issue status, reviewResults and completed child outcomes. Acknowledgements, thanks, approval, or discussion do not authorize rerunning the original task. Reply briefly with task.complete(outcome=succeeded); this ends only this feedback turn and preserves the Issue status and previous deliverables. Do not delegate, reopen, replace results or claim human acceptance. Only if the CURRENT human comment explicitly requests a concrete change or new deliverable, call task.begin_work with an exact quote of that request first. After it succeeds, perform only the requested change, reuse prior completed results, and delegate only necessary new work. Never derive a new assignment from the old Issue description alone."
+		return base + " You are handling feedback on delivered work, NOT an initial Team assignment. Read currentRequest, issue status, reviewResults and completed child outcomes. Acknowledgements, thanks, approval, or discussion do not authorize rerunning the original task. Reply briefly with task_complete(outcome=succeeded); this ends only this feedback turn and preserves the Issue status and previous deliverables. Do not delegate, reopen, replace results or claim human acceptance. Only if the CURRENT human comment explicitly requests a concrete change or new deliverable, call task_begin_work with an exact quote of that request first. After it succeeds, perform only the requested change, reuse prior completed results, and delegate only necessary new work. Never derive a new assignment from the old Issue description alone."
 	}
 	if task == nil || task.TeamID == nil {
-		return base + " You are handling standalone or explicitly mentioned work. Call task.complete only " +
+		return base + " You are handling standalone or explicitly mentioned work. Call task_complete only " +
 			"when you have a usable result. If a required capability, credential, input, or tool is unavailable, " +
-			"or a required tool call fails without a real fallback, call task.fail with a durable code and " +
-			"explanation; do not complete with a description of the failure. task.complete publishes the one " +
-			"authoritative visible reply, so do not repeat the same conclusion with issue.comment.add or " +
-			"task.progress. A human explicit mention is a direct request: answer it and finish without notifying " +
+			"or a required tool call fails without a real fallback, call task_fail with a durable code and " +
+			"explanation; do not complete with a description of the failure. task_complete publishes the one " +
+			"authoritative visible reply, so do not repeat the same conclusion with issue_comment_add or " +
+			"task_progress. A human explicit mention is a direct request: answer it and finish without notifying " +
 			"the Issue assignee unless that Agent genuinely needs new work, in which case use an explicit mention."
 	}
 	if !task.LeaderTask {
-		return base + " You are a Team worker. Complete only the assigned child work and call task.complete " +
-			"with outcome=succeeded and the result only when the assigned objective is achieved. Put the actual requested deliverable in result or summary, including the full report, answer, or accessible artifact reference; a claim that a report was written is not a deliverable. Do not leave the useful content only in private reasoning or text after task.complete. A report that the objective cannot be achieved is outcome=blocked/failed, not a successful result. If capabilities, credentials, inputs, or tools still required by executionBrief are unavailable and no human-authorized alternative can achieve the revised objective, call " +
-			"task.fail with a durable code and explanation; do not merely return explanatory text. Do not " +
-			"call task.respond, coordinate, or create child Issues."
+		return base + " You are a Team worker. Complete only the assigned child work and call task_complete " +
+			"with outcome=succeeded and the result only when the assigned objective is achieved. Put the actual requested deliverable in result or summary, including the full report, answer, or accessible artifact reference; a claim that a report was written is not a deliverable. Do not leave the useful content only in private reasoning or text after task_complete. A report that the objective cannot be achieved is outcome=blocked/failed, not a successful result. If capabilities, credentials, inputs, or tools still required by executionBrief are unavailable and no human-authorized alternative can achieve the revised objective, call " +
+			"task_fail with a durable code and explanation; do not merely return explanatory text. Do not " +
+			"call task_respond, coordinate, or create child Issues."
 	}
 	if task.ParentTaskID == nil {
 		return base + " You are the initial Team leader. Delegate suitable child work once, using the " +
-			"member.agentId from team.get as assigneeRef (never the membership id). After every " +
-			"issue.child.create succeeds, call task.complete immediately with a delegation summary; do not " +
+			"member.agentId from team_get as assigneeRef (never the membership id). After every " +
+			"issue_child_create succeeds, call task_complete immediately with a delegation summary; do not " +
 			"wait inside this turn. A fresh leader follow-up will arrive with each worker result."
 	}
 	return base + " You are a Team leader follow-up caused by a worker outcome. Read the supplied task " +
-		"inputs and coordinatorChildren.outcomes (including structured result and failure fields), not just comment summaries. Use executionBrief for the current child and coordinatorChildren.humanUpdates to apply the human's revised requirements when accepting resumed work. FIRST decide the CURRENT child: if its objective was achieved call issue.accept now; if evidence is missing, request concrete follow-up work with an explicit worker mention when that worker can supply it. After the mention succeeds call task.complete with outcome=waiting. Use run.node.fail only when the whole objective is unrecoverable and you intend to cancel remaining work, or explicitly request human action. Do not accept a report of inability as successful research. Only AFTER deciding the current child, inspect sibling statuses to synthesize or wait. This follow-up owns only its current Issue: issue.accept, " +
-		"issue.cancel, and issue.comment.add act on that Issue, so never use them to decide or message a sibling. " +
-		"Each sibling outcome gets its own follow-up. task.get also returns coordinatorChildren as read-only " +
+		"inputs and coordinatorChildren.outcomes (including structured result and failure fields), not just comment summaries. Use executionBrief for the current child and coordinatorChildren.humanUpdates to apply the human's revised requirements when accepting resumed work. FIRST decide the CURRENT child: if its objective was achieved call issue_accept now; if evidence is missing, request concrete follow-up work with an explicit worker mention when that worker can supply it. After the mention succeeds call task_complete with outcome=waiting. Use run_node_fail only when the whole objective is unrecoverable and you intend to cancel remaining work, or explicitly request human action. Do not accept a report of inability as successful research. Only AFTER deciding the current child, inspect sibling statuses to synthesize or wait. This follow-up owns only its current Issue: issue_accept, " +
+		"issue_cancel, and issue_comment_add act on that Issue, so never use them to decide or message a sibling. " +
+		"Each sibling outcome gets its own follow-up. task_get also returns coordinatorChildren as read-only " +
 		"synthesis context; use terminal sibling results when producing the final coordinator output. " +
 		"Before declaring the whole objective complete, re-read coordinatorIssue.title and coordinatorIssue.description, " +
 		"and check every requested deliverable against the actual returned content. Child acceptance alone does not " +
 		"fulfill any remaining synthesis or writing requested by the user. Perform that remaining work now. " +
-		"Put the actual final deliverables in run.node.complete.output, including the full requested text or accessible " +
+		"Put the actual final deliverables in run_node_complete.output, including the full requested text or accessible " +
 		"artifact references. A sentence claiming that content was created is not the content itself. Text written " +
 		"only after the completion tool is not delivered to the main Issue or Endpoint caller. " +
-		"Call issue.accept only for satisfactory completed " +
+		"Call issue_accept only for satisfactory completed " +
 		"work. For blocked or failed work, retry or reassign only when the new attempt changes the available " +
 		"agent, capability, credential, input, or tool; a human relaxation of evidence or data-source requirements is changed input and can justify asking the worker to finish under that revised scope. Otherwise choose a degraded result, request human " +
 		"action, cancel the blocked child, or fail the coordinator. To wait for human action, call " +
-		"issue.comment.add with an explicit human mention using task.accountableHumanRef, then task.complete(outcome=succeeded) to finish only this decision turn. Do not use outcome=waiting for a human request without pending Agent work. To mark the entire objective blocked instead, call run.node.fail with the missing inputs and next action in its message. A comment alone does not change the root Issue status. Status and progress " +
-		"comments schedule Agent work only through explicit mentions. Do not publish the same conclusion with issue.comment.add, " +
-		"task.progress, and task.complete; use task.respond once for a final visible response and then call " +
-		"task.complete, which reuses it. Do not use issue.child.create to bypass " +
-		"an unresolved blocked Issue; use the explicit decision actions. Call run.node.complete only when the whole " +
+		"issue_comment_add with an explicit human mention using task.accountableHumanRef, then task_complete(outcome=succeeded) to finish only this decision turn. Do not use outcome=waiting for a human request without pending Agent work. To mark the entire objective blocked instead, call run_node_fail with the missing inputs and next action in its message. A comment alone does not change the root Issue status. Status and progress " +
+		"comments schedule Agent work only through explicit mentions. Do not publish the same conclusion with issue_comment_add, " +
+		"task_progress, and task_complete; use task_respond once for a final visible response and then call " +
+		"task_complete, which reuses it. Do not use issue_child_create to bypass " +
+		"an unresolved blocked Issue; use the explicit decision actions. Call run_node_complete only when the whole " +
 		"coordinator has converged, and make its output synthesize every child outcome rather than only the " +
-		"current input. If sibling work is still active, do not retry run.node.complete in a loop; " +
-		"call task.complete with a waiting/decision summary so this follow-up ends and the next worker outcome " +
-		"can wake a fresh follow-up. Waiting for your delegated worker is not blocked or failed: task.complete(outcome=waiting) ends only this turn, and preserves the worker. For every final coordinator decision, provide a user-facing summary of completed work, unfinished work, the reason for the final status, and the next action. The conclusion is published on the main Issue before changing its status. A successful run.node.complete already completes this task."
+		"current input. If sibling work is still active, do not retry run_node_complete in a loop; " +
+		"call task_complete with a waiting/decision summary so this follow-up ends and the next worker outcome " +
+		"can wake a fresh follow-up. Waiting for your delegated worker is not blocked or failed: task_complete(outcome=waiting) ends only this turn, and preserves the worker. For every final coordinator decision, provide a user-facing summary of completed work, unfinished work, the reason for the final status, and the next action. The conclusion is published on the main Issue before changing its status. A successful run_node_complete already completes this task."
 }
 
 func (r *Resolver) dispatchExternal(ctx context.Context, taskID uuid.UUID, candidate controlmodel.RuntimeBindingCandidate) (*DispatchResult, error) {

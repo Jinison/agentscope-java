@@ -46,7 +46,7 @@ public final class CollaborationClient {
                 "/api/v1/issues/" + path(issueId),
                 null,
                 Map.of(TASK_TOKEN_HEADER, token),
-                "issue.get");
+                "issue_get");
     }
 
     public JsonNode comments(String issueId, String token) {
@@ -55,7 +55,7 @@ public final class CollaborationClient {
                 "/api/v1/issues/" + path(issueId) + "/comments",
                 null,
                 Map.of(TASK_TOKEN_HEADER, token),
-                "issue.comment.list");
+                "issue_comment_list");
     }
 
     public JsonNode addComment(
@@ -72,7 +72,7 @@ public final class CollaborationClient {
                         "mentions", mentions == null ? List.of() : mentions,
                         "parentId", parentId == null ? "" : parentId),
                 Map.of(TASK_TOKEN_HEADER, token),
-                "issue.comment.add");
+                "issue_comment_add");
     }
 
     public JsonNode team(String teamId, String token) {
@@ -81,7 +81,7 @@ public final class CollaborationClient {
                 "/api/v1/teams/" + path(teamId),
                 null,
                 Map.of(TASK_TOKEN_HEADER, token),
-                "team.get");
+                "team_get");
     }
 
     public JsonNode requestApproval(String token, Object request) {
@@ -90,7 +90,7 @@ public final class CollaborationClient {
                 "/api/v1/approvals",
                 request,
                 Map.of(TASK_TOKEN_HEADER, token),
-                "approval.request");
+                "approval_request");
     }
 
     /** Requests a fenced runtime tool decision and blocks without holding control-plane threads. */
@@ -108,10 +108,10 @@ public final class CollaborationClient {
                         "runtime-approvals",
                         token,
                         request,
-                        "runtime-approval.request");
+                        "runtime-approval_request");
         String approvalId = created.path("approval").path("id").asText();
         if (approvalId.isBlank()) {
-            throw new IllegalStateException("runtime-approval.request returned no approval id");
+            throw new IllegalStateException("runtime-approval_request returned no approval id");
         }
         for (; ; ) {
             JsonNode decision =
@@ -191,7 +191,7 @@ public final class CollaborationClient {
     }
 
     public JsonNode createChild(String taskId, String token, Object request) {
-        return taskSend("POST", taskId, "children", token, request, "issue.child.create");
+        return taskSend("POST", taskId, "children", token, request, "issue_child_create");
     }
 
     public JsonNode acknowledge(String taskId, String token, List<String> inputIds) {
@@ -205,12 +205,12 @@ public final class CollaborationClient {
                 "start",
                 token,
                 Map.of("expectedVersion", expectedVersion),
-                "task.start");
+                "task_start");
     }
 
     public JsonNode progress(String taskId, String token, String content) {
         return taskSend(
-                "POST", taskId, "progress", token, Map.of("content", content), "task.progress");
+                "POST", taskId, "progress", token, Map.of("content", content), "task_progress");
     }
 
     public JsonNode respond(String taskId, String token, String content) {
@@ -220,7 +220,7 @@ public final class CollaborationClient {
                 "respond",
                 token,
                 Map.of("content", content, "type", "result"),
-                "task.respond");
+                "task_respond");
     }
 
     public JsonNode complete(
@@ -244,7 +244,7 @@ public final class CollaborationClient {
                                 processedInputIds == null ? List.of() : processedInputIds,
                         "deferredInputIds",
                                 deferredInputIds == null ? List.of() : deferredInputIds),
-                "task.complete");
+                "task_complete");
     }
 
     /** Submit an explicit business outcome; the server preserves partial results on failure. */
@@ -275,7 +275,7 @@ public final class CollaborationClient {
                         processedInputIds == null ? List.of() : processedInputIds,
                         "deferredInputIds",
                         deferredInputIds == null ? List.of() : deferredInputIds),
-                "task.complete");
+                "task_complete");
     }
 
     public JsonNode fail(
@@ -289,15 +289,15 @@ public final class CollaborationClient {
                         "expectedVersion", expectedVersion,
                         "code", code == null ? "agent_failed" : code,
                         "message", message == null ? "" : message),
-                "task.fail");
+                "task_fail");
     }
 
     public JsonNode run(String taskId, String token) {
-        return taskSend("GET", taskId, "run", token, null, "run.get");
+        return taskSend("GET", taskId, "run", token, null, "run_get");
     }
 
     public JsonNode runGraph(String taskId, String token) {
-        return taskSend("GET", taskId, "run/graph", token, null, "run.graph");
+        return taskSend("GET", taskId, "run/graph", token, null, "run_graph");
     }
 
     public JsonNode completeRunNode(String taskId, String token, Object output) {
@@ -307,7 +307,7 @@ public final class CollaborationClient {
                 "run/node/complete",
                 token,
                 Map.of("output", output == null ? Map.of() : output),
-                "run.node.complete");
+                "run_node_complete");
     }
 
     public JsonNode failRunNode(String taskId, String token, String code, String message) {
@@ -317,11 +317,11 @@ public final class CollaborationClient {
                 "run/node/fail",
                 token,
                 Map.of("code", code, "message", message),
-                "run.node.fail");
+                "run_node_fail");
     }
 
     public JsonNode replanRun(String taskId, String token, Object node) {
-        return taskSend("POST", taskId, "run/replan", token, node, "run.replan");
+        return taskSend("POST", taskId, "run/replan", token, node, "run_replan");
     }
 
     public JsonNode signalRun(
@@ -336,11 +336,11 @@ public final class CollaborationClient {
                         idempotencyKey,
                         "payload",
                         payload == null ? Map.of() : payload),
-                "run.signal");
+                "run_signal");
     }
 
     public JsonNode runArtifacts(String taskId, String token) {
-        return taskSend("GET", taskId, "run/artifacts", token, null, "run.artifacts");
+        return taskSend("GET", taskId, "run/artifacts", token, null, "run_artifacts");
     }
 
     /** Uploads shared bytes; local runtime paths never cross the collaboration boundary. */
@@ -383,14 +383,14 @@ public final class CollaborationClient {
                             Map.of(TASK_TOKEN_HEADER, token));
             if (response.status() < 200 || response.status() >= 300) {
                 throw new CollaborationHttpException(
-                        "artifact.upload", response.status(), response.body());
+                        "artifact_upload", response.status(), response.body());
             }
             return ControlPlaneHttpClient.mapper().readTree(response.body());
         } catch (IOException e) {
-            throw new IllegalStateException("artifact.upload failed", e);
+            throw new IllegalStateException("artifact_upload failed", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("artifact.upload interrupted", e);
+            throw new IllegalStateException("artifact_upload interrupted", e);
         }
     }
 
@@ -408,16 +408,16 @@ public final class CollaborationClient {
                             Map.of(TASK_TOKEN_HEADER, token));
             if (response.status() < 200 || response.status() >= 300) {
                 throw new CollaborationHttpException(
-                        "artifact.download",
+                        "artifact_download",
                         response.status(),
                         new String(response.body(), StandardCharsets.UTF_8));
             }
             return response.body();
         } catch (IOException e) {
-            throw new IllegalStateException("artifact.download failed", e);
+            throw new IllegalStateException("artifact_download failed", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("artifact.download interrupted", e);
+            throw new IllegalStateException("artifact_download interrupted", e);
         }
     }
 

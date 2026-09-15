@@ -312,7 +312,7 @@ func TestAppendRuntimeContextIncludesAvailableCollaboration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, required := range []string{"agentscope-collaboration", teamID.String(), "role leader", "run.node.complete"} {
+	for _, required := range []string{"agentscope-collaboration", teamID.String(), "role leader", "run_node_complete"} {
 		if !strings.Contains(prompt, required) {
 			t.Fatalf("runtime prompt is missing %q: %s", required, prompt)
 		}

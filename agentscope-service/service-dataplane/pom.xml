@@ -60,6 +60,13 @@
             <artifactId>agentscope-extensions-model-dashscope</artifactId>
         </dependency>
 
+        <!-- OpenAI-compatible providers (DeepSeek / Kimi / GLM / MiniMax).
+             DeepSeek provider id: "deepseek:<model>", reads DEEPSEEK_API_KEY. -->
+        <dependency>
+            <groupId>io.agentscope</groupId>
+            <artifactId>agentscope-extensions-model-openai</artifactId>
+        </dependency>
+
         <!-- JdbcStore-backed BaseStore for remote filesystem routes -->
         <dependency>
             <groupId>io.agentscope</groupId>

@@ -453,7 +453,7 @@ func (s *Server) applyManagedSessionStatus(ctx context.Context, session *store.S
 
 func (s *Server) managedIncompleteTurnMessage(ctx context.Context, session *store.Session,
 	report *managedSessionEventReport) string {
-	const base = "managed Agent turn ended without task.complete or task.fail"
+	const base = "managed Agent turn ended without task_complete or task_fail"
 	if session == nil {
 		return base
 	}

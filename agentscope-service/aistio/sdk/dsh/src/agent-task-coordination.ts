@@ -41,7 +41,7 @@ export class AgentTaskCoordination {
         const disposeTool = this.registerTool(agent, taskId, token, envelope)
         this.active.set(taskId, { handle, disposeTool })
         const eventPayload = payload.length ? payload.toString('utf8') : ''
-        agent.followup({ id: crypto.randomUUID(), role: 'user', source: { kind: 'system' }, content: [{ type: 'text', text: `AgentTask ${taskId} is ready. Read the authoritative context below, use the collaboration tool for fresh discussion, and finish through task.complete or task.fail.\ncontextUrl=${contextUrl}\n${JSON.stringify(envelope)}\n${eventPayload}` }] })
+        agent.followup({ id: crypto.randomUUID(), role: 'user', source: { kind: 'system' }, content: [{ type: 'text', text: `AgentTask ${taskId} is ready. Read the authoritative context below, use the collaboration tool for fresh discussion, and finish through task_complete or task_fail.\ncontextUrl=${contextUrl}\n${JSON.stringify(envelope)}\n${eventPayload}` }] })
     }
 
     close(): void { for (const item of this.active.values()) { item.disposeTool?.(); if (item.handle) void item.handle.dispose().catch(() => undefined) }; this.active.clear() }
@@ -53,21 +53,21 @@ export class AgentTaskCoordination {
         return registry.register(defineTool({ name: 'collaboration', description: 'Read/write the authoritative Issue and Run, coordinate Team nodes, and report this AgentTask result.', parameters: { type: 'object', additionalProperties: true, properties: { action: { type: 'string' }, content: { type: 'string' }, parent_id: { type: 'string' }, mentions: { type: 'array', items: { type: 'object' } }, processed_input_ids: { type: 'array', items: { type: 'string' } }, deferred_input_ids: { type: 'array', items: { type: 'string' } }, result: { type: 'object' }, output: {}, node: { type: 'object' }, signal_name: { type: 'string' }, idempotency_key: { type: 'string' }, payload: {}, code: { type: 'string' }, message: { type: 'string' }, child: { type: 'object' } }, required: ['action'] }, execute: async (raw) => {
             const args = (raw ?? {}) as Record<string,unknown>; const action = String(args.action ?? '').toLowerCase(); const mentions = (args.mentions ?? []) as MentionTarget[]
             switch (action) {
-                case 'issue.get': return this.client.issue(issueId, token)
-                case 'issue.comment.list': return this.client.comments(issueId, token)
-                case 'issue.comment.add': return this.client.addComment(issueId, token, String(args.content ?? ''), mentions, optional(args.parent_id))
-                case 'issue.child.create': return this.client.createChild(taskId, token, args.child ?? {})
-                case 'task.progress': return this.client.progress(taskId, token, String(args.content ?? ''), mentions)
-                case 'task.respond': return this.client.respond(taskId, token, String(args.content ?? ''), mentions, optional(args.parent_id))
-                case 'task.complete': return this.client.complete(taskId, token, { summary: String(args.content ?? ''), result: args.result ?? {}, processedInputIds: args.processed_input_ids ?? [], deferredInputIds: args.deferred_input_ids ?? [] })
-                case 'task.fail': return this.client.fail(taskId, token, { code: String(args.code ?? 'agent_failed'), message: String(args.message ?? '') })
-				case 'run.get': return this.client.run(taskId, token)
-				case 'run.graph': return this.client.runGraph(taskId, token)
-				case 'run.node.complete': return this.client.completeRunNode(taskId, token, args.output ?? args.result ?? {})
-				case 'run.node.fail': return this.client.failRunNode(taskId, token, String(args.code ?? 'coordinator_failed'), String(args.message ?? ''))
-				case 'run.replan': return this.client.replanRun(taskId, token, args.node ?? {})
-				case 'run.signal': return this.client.signalRun(taskId, token, String(args.signal_name ?? ''), String(args.idempotency_key ?? crypto.randomUUID()), args.payload ?? {})
-				case 'run.artifacts': return this.client.runArtifacts(taskId, token)
+                case 'issue_get': return this.client.issue(issueId, token)
+                case 'issue_comment_list': return this.client.comments(issueId, token)
+                case 'issue_comment_add': return this.client.addComment(issueId, token, String(args.content ?? ''), mentions, optional(args.parent_id))
+                case 'issue_child_create': return this.client.createChild(taskId, token, args.child ?? {})
+                case 'task_progress': return this.client.progress(taskId, token, String(args.content ?? ''), mentions)
+                case 'task_respond': return this.client.respond(taskId, token, String(args.content ?? ''), mentions, optional(args.parent_id))
+                case 'task_complete': return this.client.complete(taskId, token, { summary: String(args.content ?? ''), result: args.result ?? {}, processedInputIds: args.processed_input_ids ?? [], deferredInputIds: args.deferred_input_ids ?? [] })
+                case 'task_fail': return this.client.fail(taskId, token, { code: String(args.code ?? 'agent_failed'), message: String(args.message ?? '') })
+				case 'run_get': return this.client.run(taskId, token)
+				case 'run_graph': return this.client.runGraph(taskId, token)
+				case 'run_node_complete': return this.client.completeRunNode(taskId, token, args.output ?? args.result ?? {})
+				case 'run_node_fail': return this.client.failRunNode(taskId, token, String(args.code ?? 'coordinator_failed'), String(args.message ?? ''))
+				case 'run_replan': return this.client.replanRun(taskId, token, args.node ?? {})
+				case 'run_signal': return this.client.signalRun(taskId, token, String(args.signal_name ?? ''), String(args.idempotency_key ?? crypto.randomUUID()), args.payload ?? {})
+				case 'run_artifacts': return this.client.runArtifacts(taskId, token)
                 default: return { error: `unsupported action ${action}` }
             }
         }}))

@@ -1251,9 +1251,9 @@ func (s *Service) BuildContext(ctx context.Context, taskID uuid.UUID) (*ContextE
 		return nil, err
 	}
 	envelope := &ContextEnvelope{Task: task, Issue: issue, Run: run,
-		AvailableActions: []string{"math.evaluate", "issue.get", "issue.comment.list", "issue.comment.add", "artifact.upload", "artifact.download",
-			"task.get", "task.start", "task.progress", "task.respond", "task.complete", "task.fail", "approval.request",
-			"run.get", "run.graph", "run.signal", "run.artifacts"}}
+		AvailableActions: []string{"math_evaluate", "issue_get", "issue_comment_list", "issue_comment_add", "artifact_upload", "artifact_download",
+			"task_get", "task_start", "task_progress", "task_respond", "task_complete", "task_fail", "approval_request",
+			"run_get", "run_graph", "run_signal", "run_artifacts"}}
 	for _, input := range task.Inputs {
 		comment, loadErr := s.Store.Collaboration().GetComment(ctx, input.CommentID)
 		if loadErr != nil {
@@ -1266,7 +1266,7 @@ func (s *Service) BuildContext(ctx context.Context, taskID uuid.UUID) (*ContextE
 		envelope.CurrentRequest += comment.Content
 	}
 	if task.TriggerType == controlmodel.AgentTaskReviewComment {
-		envelope.AvailableActions = append(envelope.AvailableActions, "task.begin_work")
+		envelope.AvailableActions = append(envelope.AvailableActions, "task_begin_work")
 		comments, listErr := s.Store.Collaboration().ListComments(ctx, issue.ID, store.CommentListOptions{Limit: 50, Tail: 50})
 		if listErr != nil {
 			return nil, listErr
@@ -1339,12 +1339,12 @@ func (s *Service) BuildContext(ctx context.Context, taskID uuid.UUID) (*ContextE
 		if err != nil {
 			return nil, err
 		}
-		envelope.AvailableActions = append(envelope.AvailableActions, "team.get")
+		envelope.AvailableActions = append(envelope.AvailableActions, "team_get")
 		if task.LeaderTask {
 			if err = s.addCoordinatorContext(ctx, envelope); err != nil {
 				return nil, err
 			}
-			envelope.AvailableActions = append(envelope.AvailableActions, "issue.child.create", "issue.accept", "issue.acceptance.update", "issue.cancel", "run.node.complete", "run.node.fail", "run.replan")
+			envelope.AvailableActions = append(envelope.AvailableActions, "issue_child_create", "issue_accept", "issue_acceptance_update", "issue_cancel", "run_node_complete", "run_node_fail", "run_replan")
 		}
 	}
 	envelope.Artifacts, err = s.Store.Collaboration().ListArtifacts(ctx, task.Tenant, task.Namespace, "issue", task.IssueID.String())

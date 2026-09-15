@@ -1477,7 +1477,7 @@ func (s *Server) completeAgentTask(c *gin.Context) {
 			s.writeCollaborationError(c, err)
 			return
 		}
-		result, err := s.callCollaborationMCPTool(c, task, "task.complete", args)
+		result, err := s.callCollaborationMCPTool(c, task, "task_complete", args)
 		if err != nil {
 			s.writeCollaborationError(c, err)
 			return

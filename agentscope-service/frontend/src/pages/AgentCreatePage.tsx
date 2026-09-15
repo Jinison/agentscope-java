@@ -81,6 +81,9 @@ const S: Record<string, React.CSSProperties> = {
   error: { alignSelf: 'center', marginRight: 'auto', color: '#b91c1c', fontSize: 13 },
 };
 
+// 中文名等非 ASCII 名称无法生成 slug 时的兜底 agentKey（每次加载固定）
+const AGENT_KEY_FALLBACK = `agent-${Math.random().toString(36).slice(2, 8)}`;
+
 const managedRuntime: DiscoveredRuntimeOption = {
   id: 'managed', name: 'AgentScope Managed', provider: 'agentscope', runtimeProfileId: '', runtimePoolId: '', hostCount: 1,
   capabilities: {
@@ -208,7 +211,10 @@ export default function AgentCreatePage() {
               <label htmlFor="agent-name" style={S.label}>Name</label>
               <input id="agent-name" style={S.input} value={name} onChange={e => {
                 setName(e.target.value);
-                if (!agentKeyCustomized) setAgentKey(e.target.value.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, ''));
+                if (!agentKeyCustomized) {
+                  const slug = e.target.value.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+                  setAgentKey(slug || (e.target.value.trim() ? AGENT_KEY_FALLBACK : ''));
+                }
               }} placeholder="e.g. Repository reviewer" autoFocus />
             </div>
             <div style={{ ...S.row, ...S.lastRow }}>
@@ -276,7 +282,7 @@ export default function AgentCreatePage() {
           <summary style={S.summary}>Advanced settings</summary>
           <div style={{ ...S.row, paddingLeft: 0, paddingRight: 0 }}>
             <label htmlFor="agent-key" style={S.label}>Agent key</label>
-            <div><input id="agent-key" style={S.input} value={agentKey} onChange={e => { setAgentKeyCustomized(true); setAgentKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, '-')); }} placeholder="repository-reviewer" /><div style={S.hint}>{scope.selectorVisible ? 'Stable identity inside the current tenant and namespace.' : 'Stable identity for this agent.'}</div></div>
+            <div><input id="agent-key" style={S.input} value={agentKey} onChange={e => { setAgentKeyCustomized(true); setAgentKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')); }} placeholder="repository-reviewer" /><div style={S.hint}>{scope.selectorVisible ? 'Stable identity inside the current tenant and namespace.' : 'Stable identity for this agent.'}</div></div>
           </div>
           {runtimeKind === 'managed' && <div style={{ ...S.row, paddingLeft: 0, paddingRight: 0 }}>
             <label htmlFor="agent-environment" style={S.label}><FolderKanban size={16} /> Environment</label>

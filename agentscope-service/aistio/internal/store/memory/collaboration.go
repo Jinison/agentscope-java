@@ -1056,9 +1056,9 @@ func (r *collaborationRepo) CompleteAgentTask(_ context.Context, id uuid.UUID, c
 		return nil, err
 	}
 	r.appendActivityLocked(&controlmodel.Activity{Tenant: task.Tenant, Namespace: task.Namespace,
-		IssueID: &task.IssueID, Actor: actor, Action: "agent_task.completed", ObjectType: "agent_task",
+		IssueID: &task.IssueID, Actor: actor, Action: "agent_task_completed", ObjectType: "agent_task",
 		ObjectRef: task.ID.String(), CausationID: task.CausationID, CorrelationID: task.CorrelationID})
-	r.enqueueEventLocked(task.Tenant, "agent-task", task.ID, "agent-task.completed.v1", task, fmt.Sprintf("agent-task-completed:%s:%d", task.ID, task.Version))
+	r.enqueueEventLocked(task.Tenant, "agent-task", task.ID, "agent-task_completed.v1", task, fmt.Sprintf("agent-task-completed:%s:%d", task.ID, task.Version))
 	return cloneAgentTask(task), nil
 }
 
@@ -1186,9 +1186,9 @@ func (r *collaborationRepo) CompleteAgentTaskWithComment(_ context.Context, id u
 	if err := r.reconcileCompletedTaskLocked(task, attempt, completion.Result, created.Author, now); err != nil {
 		return nil, nil, err
 	}
-	r.appendActivityLocked(&controlmodel.Activity{Tenant: issue.Tenant, Namespace: issue.Namespace, IssueID: &issue.ID, Actor: created.Author, Action: "agent_task.completed", ObjectType: "agent_task", ObjectRef: task.ID.String(), CausationID: task.CausationID, CorrelationID: task.CorrelationID})
+	r.appendActivityLocked(&controlmodel.Activity{Tenant: issue.Tenant, Namespace: issue.Namespace, IssueID: &issue.ID, Actor: created.Author, Action: "agent_task_completed", ObjectType: "agent_task", ObjectRef: task.ID.String(), CausationID: task.CausationID, CorrelationID: task.CorrelationID})
 	r.enqueueEventLocked(issue.Tenant, "comment", created.ID, "comment.created.v1", map[string]any{"comment": created, "routes": routes}, "comment-created:"+created.ID.String())
-	r.enqueueEventLocked(task.Tenant, "agent-task", task.ID, "agent-task.completed.v1", task, fmt.Sprintf("agent-task-completed:%s:%d", task.ID, task.Version))
+	r.enqueueEventLocked(task.Tenant, "agent-task", task.ID, "agent-task_completed.v1", task, fmt.Sprintf("agent-task-completed:%s:%d", task.ID, task.Version))
 	out := cloneComment(created)
 	out.Routes = routes
 	return cloneAgentTask(task), out, nil
@@ -1342,7 +1342,7 @@ func (r *collaborationRepo) FailAgentTaskWithAttempt(_ context.Context, id uuid.
 		IdempotencyKey: "attempt-failed:" + attempt.ID.String(), OccurredAt: now}
 	r.s.runEvents[task.OrchestrationRunID] = append(r.s.runEvents[task.OrchestrationRunID], event)
 	r.notifyTaskFailureInboxLocked(task)
-	r.enqueueEventLocked(task.Tenant, "agent-task", task.ID, "agent-task.failed.v1", task, fmt.Sprintf("agent-task-failed:%s:%d", task.ID, task.Version))
+	r.enqueueEventLocked(task.Tenant, "agent-task", task.ID, "agent-task_failed.v1", task, fmt.Sprintf("agent-task-failed:%s:%d", task.ID, task.Version))
 	if abortManaged {
 		r.enqueueEventLocked(task.Tenant, "execution-attempt", attempt.ID,
 			"execution-attempt.abort-managed.v1", attempt, "abort-managed-attempt:"+attempt.ID.String())
@@ -1771,7 +1771,7 @@ func (r *collaborationRepo) CreateApproval(_ context.Context, approval *controlm
 		Actor: copy.RequestedBy, Title: "Approval requested", Body: copy.Reason,
 		DedupeKey: "approval:" + copy.ID.String(), CreatedAt: now}
 	r.s.inboxItems[item.ID] = item
-	r.enqueueEventLocked(copy.Tenant, "approval", copy.ID, "approval.requested.v1", copy, "approval-requested:"+copy.ID.String())
+	r.enqueueEventLocked(copy.Tenant, "approval", copy.ID, "approval_requested.v1", copy, "approval-requested:"+copy.ID.String())
 	return cloneApproval(copy), nil
 }
 
@@ -1838,7 +1838,7 @@ func (r *collaborationRepo) CreateManagedToolApproval(_ context.Context, req sto
 		Actor: controlmodel.Actor{Type: controlmodel.ActorAgent, Ref: task.AgentRef}, Payload: payload,
 		IdempotencyKey: "attempt-waiting-approval:" + approval.ID.String(), OccurredAt: now}
 	r.s.runEvents[task.OrchestrationRunID] = append(r.s.runEvents[task.OrchestrationRunID], event)
-	r.enqueueEventLocked(approval.Tenant, "approval", approval.ID, "approval.requested.v1", approval,
+	r.enqueueEventLocked(approval.Tenant, "approval", approval.ID, "approval_requested.v1", approval,
 		"approval-requested:"+approval.ID.String())
 	return cloneApproval(approval), cloneAgentTask(task), cloneExecution(attempt), nil
 }

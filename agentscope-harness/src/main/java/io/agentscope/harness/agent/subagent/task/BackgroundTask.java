@@ -126,6 +126,39 @@ public class BackgroundTask {
         return null;
     }
 
+    /** Task-scoped accessor aliases used by the aistio task adapter and harness tools. */
+    public String task_getTaskId() {
+        return getTaskId();
+    }
+
+    public String task_getAgentId() {
+        return getAgentId();
+    }
+
+    public Instant task_getCreatedAt() {
+        return getCreatedAt();
+    }
+
+    public Instant task_getLastCheckedAt() {
+        return getLastCheckedAt();
+    }
+
+    public TaskStatus task_getTaskStatus() {
+        return getTaskStatus();
+    }
+
+    public String task_getStatus() {
+        return getStatus();
+    }
+
+    public String task_getResult() {
+        return getResult();
+    }
+
+    public Exception task_getError() {
+        return getError();
+    }
+
     /**
      * Blocks until the task completes or the timeout elapses.
      *
