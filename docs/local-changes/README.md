@@ -13,6 +13,7 @@
 | [为什么ManagedAgents和Dashboard数据不一致.md](./为什么ManagedAgents和Dashboard数据不一致.md) | Managed Agents 与 Dashboard 数据口径不同的原因 |
 | [为什么看不到DESIGN导航.md](./为什么看不到DESIGN导航.md) | 文档里的 DESIGN 导航与本地/发布版控制台布局差异说明 |
 | [README-本地版.md](./README-本地版.md) | 本地运行 AgentScope Service（无 Docker）的快速说明 |
+| [腾讯云PostgreSQL部署记录-2026-09-15.md](./腾讯云PostgreSQL部署记录-2026-09-15.md) | 把本地 PG 库部署到腾讯云 `datadict-server` 的过程、参数与连接方式 |
 
 ## 使用建议
 
