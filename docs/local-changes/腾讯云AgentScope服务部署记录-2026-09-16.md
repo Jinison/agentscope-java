@@ -56,7 +56,15 @@ bash ~/apps/agentscope-java-src/agentscope-service/scripts/deploy-asm.sh start|s
 - 控制台：http://81.70.51.239:18080/ ，默认 `admin` / `admin`
 - 登录接口：POST `/api/auth/login`（返回 JWT），受保护接口带 `Authorization: Bearer <token>`
 
-## 六、本次踩坑记录
+## 六、停服记录
+
+- 2026-09-16 14:37，按需停掉整套服务：`sudo systemctl stop agentscope-service`。
+  四个进程已退出、18080/8081/8082/8083 端口已释放、公网控制台不再可达；可用内存从约 940MB 回到约 1357MB。
+- 注意：systemd 单元的 autostart（`systemctl is-enabled`）仍为 enabled，机器重启后会自动拉起。
+  想让它重启后也保持停止，执行 `sudo systemctl disable agentscope-service`（需要时 `start` 仍可手动拉起）。
+- 本次只停了 AgentScope Service，云端 PostgreSQL（`postgresql@17-main`）保持运行。
+
+## 七、本次踩坑记录
 
 1. **本地上行限速**：部署当天本地上行仅 ~100KB/s（正常时 3.6MB/s），后台 nohup scp 会随 exec 会话退出而中断，
    最终改为前台阻塞式串行 scp + md5 校验，aistiod 用 gzip 预压缩省一半时间。
