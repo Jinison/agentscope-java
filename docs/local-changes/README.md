@@ -14,6 +14,7 @@
 | [为什么看不到DESIGN导航.md](./为什么看不到DESIGN导航.md) | 文档里的 DESIGN 导航与本地/发布版控制台布局差异说明 |
 | [README-本地版.md](./README-本地版.md) | 本地运行 AgentScope Service（无 Docker）的快速说明 |
 | [腾讯云PostgreSQL部署记录-2026-09-15.md](./腾讯云PostgreSQL部署记录-2026-09-15.md) | 把本地 PG 库部署到腾讯云 `datadict-server` 的过程、参数与连接方式 |
+| [腾讯云AgentScope服务部署记录-2026-09-16.md](./腾讯云AgentScope服务部署记录-2026-09-16.md) | 云端 AgentScope Service 四平面部署（产物构建/上传、systemd、踩坑记录） |
 
 ## 使用建议
 
